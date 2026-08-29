@@ -1,0 +1,76 @@
+#cloud-config
+# Kit de démarrage — Docker en mode rootless (VM as Code)
+# Variante de starter-kit/ : le démon Docker tourne sous l'utilisateur admin, jamais en root.
+# Voir tutoriels/02-limites-et-depannage.md pour les compromis de ce mode.
+
+hostname: starter-kit-rootless-vm
+
+ssh_pwauth: false
+
+users:
+  - name: admin
+    groups: [sudo]
+    shell: /bin/bash
+    sudo: "ALL=(ALL) NOPASSWD:ALL"
+    lock_passwd: true
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... remplacez-moi-par-votre-cle-publique
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - ca-certificates
+  - curl
+  - gnupg
+  - ufw
+  - uidmap
+  - dbus-user-session
+  - fuse-overlayfs
+  - slirp4netns
+
+write_files:
+  - path: /opt/stack/README.txt
+    permissions: '0644'
+    content: |
+      Ce dossier accueille votre docker-compose.yml et votre Taskfile.yml (mode rootless).
+      Copiez-y (git clone ou scp) le contenu fourni dans compose/ et Taskfile.yml,
+      puis lancez « task up » depuis ce dossier, en tant qu'utilisateur admin (jamais root).
+
+runcmd:
+  # Dépôt officiel Docker (fournit docker-ce-cli, le plugin compose et les extras rootless)
+  - install -m 0755 -d /etc/apt/keyrings
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  - chmod a+r /etc/apt/keyrings/docker.asc
+  - >
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" > /etc/apt/sources.list.d/docker.list
+  - apt-get update
+  - apt-get install -y docker-ce-cli docker-compose-plugin docker-ce-rootless-extras
+
+  # Autoriser le bind sur les ports < 1024 sans capacité spéciale (nécessaire pour Traefik)
+  - echo 'net.ipv4.ip_unprivileged_port_start=80' > /etc/sysctl.d/90-rootless-ports.conf
+  - sysctl --system
+
+  # Maintenir la session utilisateur active au démarrage (requis pour un démon en espace utilisateur)
+  - loginctl enable-linger admin
+
+  # Task — dépôt officiel go-task (Cloudsmith)
+  - curl -1sLf 'https://dl.cloudsmith.io/public/task/task/setup.deb.sh' | bash
+  - apt-get install -y task
+
+  # Installation du démon Docker rootless, exécutée en tant qu'utilisateur admin (jamais root)
+  - su - admin -c 'export XDG_RUNTIME_DIR=/run/user/$(id -u); dockerd-rootless-setuptool.sh install'
+  - su - admin -c 'systemctl --user enable --now docker'
+  - echo "export XDG_RUNTIME_DIR=/run/user/$(id -u admin)" >> /home/admin/.bashrc
+  - echo "export DOCKER_HOST=unix:///run/user/$(id -u admin)/docker.sock" >> /home/admin/.bashrc
+  - echo "export PATH=/usr/bin:\$PATH" >> /home/admin/.bashrc
+
+  # Pare-feu hôte minimal
+  - ufw allow OpenSSH
+  - ufw allow 80/tcp
+  - ufw --force enable
+
+  - mkdir -p /opt/stack
+  - chown admin:admin /opt/stack
+
+final_message: "VM prête : Docker rootless (utilisateur admin), Docker Compose, Task et le pare-feu (ufw) sont installés. Copiez votre stack dans /opt/stack puis lancez 'task up' en tant qu'admin."

@@ -1,0 +1,72 @@
+version: '3'
+
+vars:
+  COMPOSE_DIR: compose
+
+tasks:
+  up:
+    desc: Démarre la stack (Traefik + services)
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - docker compose up -d
+
+  down:
+    desc: Arrête la stack
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - docker compose down
+
+  restart:
+    desc: Redémarre la stack
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - docker compose restart
+
+  logs:
+    desc: Affiche les journaux en continu
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - docker compose logs -f --tail=100
+
+  ps:
+    desc: Liste l'état des conteneurs
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - docker compose ps
+
+  pull:
+    desc: Télécharge les dernières images des services définis
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - docker compose pull
+
+  validate:
+    desc: Valide la syntaxe du docker-compose.yml
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - docker compose config --quiet
+
+  scan:
+    desc: Scanne localement (hors-ligne) les images de la stack avec Trivy
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - |
+        for image in $(docker compose config --images); do
+          echo "==> Scan de $image"
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$HOME/.cache/trivy:/root/.cache/" \
+            ghcr.io/aquasecurity/trivy:0.74.0 image --severity HIGH,CRITICAL --exit-code 0 "$image"
+        done
+
+  verify-sandbox:
+    desc: Vérifie que le conteneur whoami tourne bien sous gVisor (runsc)
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - docker inspect whoami --format '{{"{{"}}.HostConfig.Runtime{{"}}"}}'
+
+  clean:
+    desc: Arrête la stack et supprime les volumes (irréversible)
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - docker compose down -v

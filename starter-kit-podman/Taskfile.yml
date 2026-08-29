@@ -1,0 +1,67 @@
+version: '3'
+
+dotenv: ['compose/.env']
+
+vars:
+  COMPOSE_DIR: compose
+
+tasks:
+  up:
+    desc: Démarre la stack (Traefik + services) via Podman
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - podman-compose up -d
+
+  down:
+    desc: Arrête la stack
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - podman-compose down
+
+  restart:
+    desc: Redémarre la stack
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - podman-compose restart
+
+  logs:
+    desc: Affiche les journaux en continu
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - podman-compose logs -f --tail=100
+
+  ps:
+    desc: Liste l'état des conteneurs
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - podman-compose ps
+
+  pull:
+    desc: Télécharge les dernières images des services définis
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - podman-compose pull
+
+  validate:
+    desc: Valide la syntaxe du docker-compose.yml
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - podman-compose config > /dev/null
+
+  scan:
+    desc: Scanne localement (hors-ligne) les images de la stack avec Trivy
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - |
+        for image in $(grep -E '^\s*image:' docker-compose.yml | awk '{print $2}' | tr -d '"'); do
+          echo "==> Scan de $image"
+          podman run --rm \
+            -v "$HOME/.cache/trivy:/root/.cache/" \
+            ghcr.io/aquasecurity/trivy:0.74.0 image --severity HIGH,CRITICAL --exit-code 0 "$image"
+        done
+
+  clean:
+    desc: Arrête la stack et supprime les volumes (irréversible)
+    dir: '{{.COMPOSE_DIR}}'
+    cmds:
+      - podman-compose down -v

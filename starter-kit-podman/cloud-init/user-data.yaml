@@ -1,0 +1,68 @@
+#cloud-config
+# Kit de démarrage — Podman (rootless par défaut, VM as Code)
+# Podman est reconnu comme moteur équivalent à Docker Compose (contrainte #2 de l'énoncé),
+# via sa couche de compatibilité Compose (podman-compose).
+
+hostname: starter-kit-podman-vm
+
+ssh_pwauth: false
+
+users:
+  - name: admin
+    groups: [sudo]
+    shell: /bin/bash
+    sudo: "ALL=(ALL) NOPASSWD:ALL"
+    lock_passwd: true
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... remplacez-moi-par-votre-cle-publique
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - ca-certificates
+  - curl
+  - gnupg
+  - ufw
+  - podman
+  - uidmap
+  - slirp4netns
+  - fuse-overlayfs
+  - python3-pip
+
+write_files:
+  - path: /opt/stack/README.txt
+    permissions: '0644'
+    content: |
+      Ce dossier accueille votre docker-compose.yml et votre Taskfile.yml (variante Podman).
+      Copiez-y (git clone ou scp) le contenu fourni dans compose/ et Taskfile.yml,
+      puis lancez « task up » depuis ce dossier, en tant qu'utilisateur admin (jamais root).
+
+runcmd:
+  # podman-compose (couche de compatibilité Compose pour Podman)
+  - pip3 install podman-compose
+
+  # Autoriser le bind sur les ports < 1024 sans capacité spéciale (nécessaire pour Traefik)
+  - echo 'net.ipv4.ip_unprivileged_port_start=80' > /etc/sysctl.d/90-rootless-ports.conf
+  - sysctl --system
+
+  # Maintenir la session utilisateur active au démarrage (requis par Podman rootless)
+  - loginctl enable-linger admin
+
+  # Activer le socket API Podman (compatible Docker) pour l'utilisateur admin
+  - su - admin -c 'export XDG_RUNTIME_DIR=/run/user/$(id -u); systemctl --user enable --now podman.socket'
+  - echo "export XDG_RUNTIME_DIR=/run/user/$(id -u admin)" >> /home/admin/.bashrc
+
+  # Task — dépôt officiel go-task (Cloudsmith)
+  - curl -1sLf 'https://dl.cloudsmith.io/public/task/task/setup.deb.sh' | bash
+  - apt-get install -y task
+
+  # Pare-feu hôte minimal
+  - ufw allow OpenSSH
+  - ufw allow 80/tcp
+  - ufw --force enable
+
+  - mkdir -p /opt/stack
+  - chown admin:admin /opt/stack
+
+final_message: "VM prête : Podman (rootless), podman-compose, Task et le pare-feu (ufw) sont installés. Copiez votre stack dans /opt/stack puis lancez 'task up' en tant qu'admin."
