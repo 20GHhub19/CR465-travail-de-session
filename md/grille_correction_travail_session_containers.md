@@ -16,7 +16,7 @@ Cette grille vise à uniformiser la correction d’un travail de session portant
 
 ## Rappel du scénario attendu
 
-Le scénario pédagogique attendu est le suivant : un utilisateur consulte une offre de formation dans **Drupal Commerce**, effectue un paiement fictif, simulé ou en environnement sandbox, puis un **workflow n8n** attribue ou synchronise un droit d’accès dans **Moodle**. L’utilisateur accède ensuite au contenu pédagogique dans Moodle, avec **Keycloak** comme mécanisme d’identité et de SSO, **Traefik** comme reverse proxy, **OpenAppSec** comme couche WAF, **Portainer CE** comme console graphique d’exploitation, et un volet de journalisation ou d’observabilité minimal si possible.
+Le scénario pédagogique attendu est le suivant : un utilisateur consulte une offre de formation dans **Drupal Commerce**, effectue un paiement fictif, simulé ou en environnement sandbox, puis un **workflow n8n** attribue ou synchronise un droit d’accès dans **Moodle**. L’utilisateur accède ensuite au contenu pédagogique dans Moodle, avec **Keycloak** comme mécanisme d’identité et de SSO, **Traefik** comme reverse proxy, **Portainer CE** comme console graphique d’exploitation, et un volet de journalisation ou d’observabilité minimal si possible. **OpenAppSec** comme couche WAF est un bonus optionnel qui n’est pas requis pour la réussite du livrable.
 
 ## Livrables à vérifier
 
@@ -45,10 +45,11 @@ L’usage d’outils d’IA générative est autorisé pour la réalisation du t
 | 6. Segmentation réseau | 3 |
 | 7. Intégration fonctionnelle Drupal Commerce → n8n → Moodle | 3 |
 | 8. IAM et SSO | 3 |
-| 9. Reverse proxy et WAF | 3 |
+| 9. Reverse proxy (Traefik) | 3 |
 | 10. Observabilité et exploitation | 3 |
 | 11. Qualité des livrables | 4 |
 | **Total** | **40** |
+| Bonus — WAF (OpenAppSec) | **+2 (hors total)** |
 
 ## 1. VM as Code avec cloud-init — 5 points
 
@@ -74,7 +75,7 @@ L’équipe doit démontrer l’usage réel d’un fichier **cloud-init** pour i
 
 ### Attentes
 
-Le schéma d’architecture doit être lisible, cohérent avec ce qui est réellement déployé et montrer les principales zones de confiance, les flux réseau, les points d’exposition et le parcours métier. Le parcours attendu inclut **Drupal Commerce**, **n8n**, **Moodle**, **Keycloak**, **Traefik**, **OpenAppSec**, ainsi que les couches de données et d’exploitation lorsque présentes.
+Le schéma d’architecture doit être lisible, cohérent avec ce qui est réellement déployé et montrer les principales zones de confiance, les flux réseau, les points d’exposition et le parcours métier. Le parcours attendu inclut **Drupal Commerce**, **n8n**, **Moodle**, **Keycloak**, **Traefik**, ainsi que les couches de données et d’exploitation lorsque présentes. **OpenAppSec** (WAF) peut apparaître en pointillé dans le schéma comme composant bonus, s’il est implémenté.
 
 ### Répartition suggérée
 
@@ -86,7 +87,7 @@ Le schéma d’architecture doit être lisible, cohérent avec ce qui est réell
 ### Vérifications utiles
 
 - flux d’entrée via Traefik;
-- présence du WAF;
+- présence du WAF si implémenté (bonus, en pointillé dans le schéma);
 - rôle de n8n dans l’intégration;
 - séparation entre services exposés et services internes.
 
@@ -194,18 +195,30 @@ L’usage de **Keycloak** doit être démontré au minimum avec un SSO vers Mood
 - **1 point** : configuration présente mais peu convaincante.
 - **0 point** : absence de mise en œuvre réelle.
 
-## 9. Reverse proxy et WAF — 3 points
+## 9. Reverse proxy — 3 points
 
 ### Attentes
 
-Traefik doit être identifié comme point d’entrée et OpenAppSec comme couche de protection applicative, configurée en mode local sans dépendance à un compte cloud tiers (ex. Check Point Infinity). Le correcteur doit vérifier que l’équipe comprend le rôle de chacun et que l’exposition des services est centralisée.
+Traefik doit être identifié comme point d’entrée centralisé. Le correcteur doit vérifier que l’exposition des services est centralisée via Traefik.
 
 ### Répartition suggérée
 
-- **3 points** : proxy et WAF intégrés, en mode local, et correctement expliqués.
+- **3 points** : proxy intégré et correctement expliqué.
 - **2 points** : présence partielle ou démonstration limitée.
 - **1 point** : compréhension faible ou intégration incomplète.
 - **0 point** : absence ou incompréhension manifeste.
+
+## Bonus — WAF (OpenAppSec) — jusqu’à +2 points hors total
+
+### Attentes
+
+L’ajout d’OpenAppSec comme couche WAF est un **bonus optionnel**, non requis pour la réussite du livrable. Une équipe qui ne l’implémente pas ne subit aucune pénalité. S’il est implémenté, il doit être configuré en mode local, sans dépendance à un compte Check Point Infinity, pour être admissible au bonus.
+
+### Répartition suggérée
+
+- **+2 points** : WAF fonctionnel, en mode local, bien intégré et clairement expliqué.
+- **+1 point** : WAF présent mais partiellement fonctionnel ou peu expliqué.
+- **0 point** : WAF absent, ou implémenté en mode cloud (aucune pénalité, simplement pas de bonus).
 
 ## 10. Observabilité et exploitation — 3 points
 
@@ -254,14 +267,15 @@ Les éléments suivants doivent entraîner une pénalité importante, voire un �
 - incapacité à expliquer les réseaux, les flux ou les dépendances (pénalité sur les critères concernés);
 - vidéo dépassant 15 min 59 s (-2 points sur Qualité des livrables);
 - dépôt GitHub inutilisable ou incomplet (-3 points sur Déploiement conteneurisé, -2 points sur Qualité des livrables);
-- contributions individuelles non identifiables (-1 à -2 points sur Qualité des livrables);
-- dépendance non justifiée à un service cloud tiers, par exemple OpenAppSec en mode cloud (-2 points sur Reverse proxy et WAF, -1 point sur Architecture et schéma).
+- contributions individuelles non identifiables (-1 à -2 points sur Qualité des livrables).
+
+Le WAF (OpenAppSec) étant un bonus optionnel, son absence n’entraîne aucune pénalité. Si une équipe tente le WAF en mode cloud, le bonus de +2 points n’est simplement pas accordé, sans impact sur les autres critères.
 
 ## Grille synthèse par équipe
 
-| Équipe | VM as Code /5 | Architecture /5 | Déploiement /3 | Images /3 | Exécution /5 | Réseaux /3 | Intégration /3 | IAM/SSO /3 | Proxy/WAF /3 | Observabilité /3 | Livrables /4 | Total /40 |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Équipe | VM as Code /5 | Architecture /5 | Déploiement /3 | Images /3 | Exécution /5 | Réseaux /3 | Intégration /3 | IAM/SSO /3 | Reverse Proxy /3 | Observabilité /3 | Livrables /4 | Total /40 | Bonus WAF /2 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 
 ## Commentaires du correcteur
 

@@ -12,10 +12,11 @@
 | Segmentation réseau | Réseaux d’exposition, applicatifs, données, exposition minimale, flux justifiés | Segmentation claire, bien pensée et bien expliquée | Segmentation présente mais perfectible | Segmentation minimale ou peu cohérente | Réseau plat ou services sensibles exposés inutilement | 3 |
 | Intégration Drupal Commerce → n8n → Moodle | Cohérence du parcours métier, vente, automatisation, attribution d’accès, démonstration | Flux cohérent, démontré, compréhensible et bien documenté | Flux présent mais partiellement simulé ou incomplet | Logique annoncée mais peu démontrée | Aucune intégration crédible entre les composants | 3 |
 | IAM et SSO | Keycloak, SSO Moodle, compréhension des flux d’authentification | SSO fonctionnel, bien démontré et bien expliqué | SSO partiellement fonctionnel ou démonstration incomplète | Configuration présente mais peu convaincante | Absence de mise en œuvre réelle | 3 |
-| Reverse proxy et WAF | Rôle de Traefik, rôle d’OpenAppSec en mode local (sans compte cloud tiers), centralisation de l’exposition | Proxy et WAF intégrés et correctement expliqués | Présence partielle ou démonstration limitée | Compréhension faible, intégration incomplète | Absence ou incompréhension manifeste | 3 |
+| Reverse proxy | Rôle de Traefik, centralisation de l’exposition | Proxy intégré et correctement expliqué | Présence partielle ou démonstration limitée | Compréhension faible, intégration incomplète | Absence ou incompréhension manifeste | 3 |
 | Observabilité et exploitation | Usage de Portainer CE, états des conteneurs, journaux, diagnostic, éventuellement Grafana/Loki | Portainer CE opérationnel et utilisé intelligemment; diagnostic crédible montré | Portainer présent et exploité partiellement | Portainer peu exploité ou démonstration faible | Aucun usage pédagogique réel de l’observabilité | 3 |
 | Qualité des livrables | Vidéo M365 conforme, GitBook, GitHub, document Word/PPT, cohérence globale, traçabilité des contributions individuelles | Tous les livrables sont complets, cohérents, clairs et professionnels | Très bons livrables avec quelques défauts mineurs | Livrables présents mais inégaux ou difficiles à exploiter | Plusieurs livrables absents, non accessibles ou de faible qualité | 4 |
 | **Total** |  |  |  |  |  | **40** |
+| Bonus — WAF (OpenAppSec) | Rôle d’OpenAppSec en mode local (sans compte cloud tiers), optionnel et non requis | WAF fonctionnel, en mode local, bien intégré et expliqué (+2) | WAF présent mais partiel ou peu expliqué (+1) | — | Absent ou en mode cloud, aucun bonus (0) | **+2 (hors total)** |
 
 ## Vérifications éliminatoires ou pénalités majeures
 
@@ -28,13 +29,14 @@
 | Vidéo au-delà de 15 min 59 s | -2 points sur Qualité des livrables |
 | Dépôt GitHub inutilisable | -3 points sur Déploiement conteneurisé et -2 points sur Qualité des livrables |
 | Contributions individuelles non identifiables | -1 à -2 points sur Qualité des livrables |
-| Dépendance non justifiée à un service cloud tiers (ex. OpenAppSec en mode cloud, scan d’image via un service cloud) | -2 points sur Reverse proxy et WAF et -1 point sur Architecture et schéma |
+
+Le WAF (OpenAppSec) est un bonus optionnel : son absence n’entraîne aucune pénalité. Une équipe qui le configure en mode cloud ne reçoit simplement pas le bonus de +2 points, sans impact sur les autres critères.
 
 ## Feuille de pointage par équipe
 
-| Équipe | VM as Code /5 | Architecture /5 | Déploiement /3 | Images /3 | Exécution /5 | Réseaux /3 | Intégration /3 | IAM/SSO /3 | Proxy/WAF /3 | Observabilité /3 | Livrables /4 | Total /40 |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Équipe | VM as Code /5 | Architecture /5 | Déploiement /3 | Images /3 | Exécution /5 | Réseaux /3 | Intégration /3 | IAM/SSO /3 | Reverse Proxy /3 | Observabilité /3 | Livrables /4 | Total /40 | Bonus WAF /2 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 
 ## Références de correction
 

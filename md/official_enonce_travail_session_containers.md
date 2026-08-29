@@ -17,7 +17,7 @@ Votre équipe doit concevoir, automatiser, déployer et documenter une plateform
 L’architecture devra intégrer les composants suivants :
 
 - **Traefik** comme reverse proxy d’entrée et contrôleur d’exposition web.
-- **OpenAppSec** de Check Point comme couche WAF ou protection applicative en frontal, configurée en mode local sans dépendance à un compte cloud tiers.
+- **OpenAppSec** (bonus) de Check Point comme couche WAF ou protection applicative en frontal, configurée en mode local sans dépendance à un compte cloud tiers. Ce composant est optionnel et n’est pas requis pour la réussite du livrable.
 - **Drupal Commerce** comme portail transactionnel de vente des formations et contenus pédagogiques.
 - **Moodle** comme LMS principal et plateforme de consommation des contenus après attribution des droits d’accès.
 - **Keycloak** comme fournisseur d’identité et de SSO.
@@ -37,7 +37,7 @@ Le projet n’a pas pour objectif de reproduire une architecture d’entreprise 
 - Concevoir une architecture multi-services cohérente et segmentée, intégrant une logique de commerce numérique, d’identité et de consommation pédagogique.
 - Déployer une VM Linux à l’aide d’un mécanisme d’initialisation déclaratif avec cloud-init.
 - Déployer une plateforme applicative conteneurisée avec Docker Compose.
-- Mettre en place un reverse proxy, un WAF et des points d’entrée HTTPS.
+- Mettre en place un reverse proxy et des points d’entrée HTTPS, et optionnellement un WAF en bonus.
 - Configurer un mécanisme de SSO avec Keycloak, au minimum entre Keycloak et Moodle.
 - Mettre en place une logique d’intégration visuelle avec n8n entre Drupal Commerce et Moodle, sans exiger de développement logiciel avancé.
 - Appliquer des mesures de durcissement sur les images, les conteneurs et l’hôte.
@@ -58,7 +58,7 @@ Les contraintes suivantes s’appliquent à tous les projets :
 7. **Aucune programmation avancée obligatoire.** Les intégrations orientées produit doivent privilégier les outils graphiques, les connecteurs, les webhooks et les interfaces visuelles.
 8. **Paiement simplifié autorisé.** Le paiement peut être fictif, simulé ou en environnement sandbox. Aucune intégration comptable complète n’est requise. Aucune preuve de paiement réelle n’est exigée.
 9. **Livrables numériques obligatoires.** La remise doit comprendre une vidéo, un GitBook, un dépôt GitHub et un document de synthèse Word ou PowerPoint.
-10. **Souveraineté et absence de dépendance cloud tierce.** La plateforme doit demeurer auto-hébergée et fonctionner sans dépendance à un service cloud externe. OpenAppSec doit être configuré en mode local, sans compte Check Point Infinity. Les mécanismes de scan d’images doivent utiliser des outils locaux ou hors-ligne (ex. Trivy, Grype) plutôt qu’un service cloud.
+10. **Souveraineté et absence de dépendance cloud tierce.** La plateforme doit demeurer auto-hébergée et fonctionner sans dépendance à un service cloud externe. Si votre équipe choisit d’implémenter le WAF bonus (OpenAppSec), celui-ci doit être configuré en mode local, sans compte Check Point Infinity. Les mécanismes de scan d’images doivent utiliser des outils locaux ou hors-ligne (ex. Trivy, Grype) plutôt qu’un service cloud.
 
 ## Architecture cible minimale
 
@@ -66,8 +66,9 @@ Votre architecture devra suivre un modèle semblable au suivant :
 
 ```mermaid
 flowchart TD
-    Internet["Utilisateurs / Internet"] -->|"HTTP/HTTPS"| WAF["OpenAppSec (WAF, mode local)"]
-    WAF --> Proxy["Traefik (Reverse Proxy)"]
+    Internet["Utilisateurs / Internet"] -->|"HTTP/HTTPS"| Proxy["Traefik (Reverse Proxy)"]
+    Internet -.->|"bonus"| WAF["OpenAppSec (WAF, mode local)"]
+    WAF -.->|"bonus"| Proxy
 
     Proxy --> Drupal["Drupal Commerce"]
     Proxy --> Moodle["Moodle"]
@@ -87,10 +88,10 @@ flowchart TD
     N8N --> Postgres
 
     classDef optional stroke-dasharray:5,5;
-    class Opencast,Redis,Grafana optional;
+    class Opencast,Redis,Grafana,WAF optional;
 ```
 
-Parcours métier : vente sur Drupal Commerce → workflow n8n → accès Moodle. Les nœuds en pointillé (Opencast, Redis, Grafana/Loki) sont optionnels ou bonus.
+Parcours métier : vente sur Drupal Commerce → workflow n8n → accès Moodle. Les nœuds en pointillé (WAF, Opencast, Redis, Grafana/Loki) sont optionnels ou bonus. Le WAF n’est pas un prérequis pour exposer Traefik : son ajout est une bonification, pas un bloquant.
 
 Ce schéma n’est pas figé. Vous pouvez l’ajuster si vous justifiez clairement vos choix. Toutefois, les principes suivants doivent être respectés :
 
@@ -178,7 +179,7 @@ Aucune intégration comptable complète n’est requise. Aucune preuve de paieme
 
 Votre plateforme doit montrer plusieurs couches de protection complémentaires, par exemple :
 
-- WAF en frontal;
+- WAF en frontal (bonus, optionnel);
 - reverse proxy centralisé;
 - segmentation réseau;
 - IAM et SSO;
@@ -287,7 +288,7 @@ repo/
 │   ├── docker-compose.yml
 │   ├── .env.example
 │   ├── traefik/
-│   ├── openappsec/
+│   ├── openappsec/            # bonus, optionnel
 │   ├── drupal-commerce/
 │   ├── moodle/
 │   ├── keycloak/
@@ -315,7 +316,7 @@ La structure suivante est fortement recommandée :
 3. Présentation de l’architecture logique et du schéma réseau.
 4. Démonstration du déploiement ou de l’environnement opérationnel.
 5. Démonstration de Drupal Commerce, du flux n8n, de Moodle et du SSO Keycloak.
-6. Présentation du reverse proxy, du WAF et des protections choisies.
+6. Présentation du reverse proxy et des protections choisies, et démonstration du WAF bonus si votre équipe l’a implémenté.
 7. Démonstration de Portainer CE et, si disponible, de la journalisation centralisée.
 8. Conclusion courte : limites, risques résiduels, apprentissages.
 
@@ -331,10 +332,11 @@ La structure suivante est fortement recommandée :
 | Segmentation réseau | Réseaux séparés, exposition minimale, flux justifiés | 3 |
 | Intégration fonctionnelle | Drupal Commerce, n8n et Moodle intégrés selon un flux crédible sans codage avancé | 3 |
 | IAM et SSO | Keycloak configuré, SSO Moodle fonctionnel, gestion minimale des rôles | 3 |
-| Reverse proxy et WAF | Traefik et OpenAppSec (mode local) intégrés et expliqués | 3 |
+| Reverse proxy | Traefik intégré et expliqué comme point d’entrée centralisé | 3 |
 | Observabilité | Portainer CE opérationnel, plus logs ou diagnostic crédible | 3 |
 | Qualité des livrables | Vidéo conforme, GitBook clair, GitHub propre, Word/PPT synthétique, contributions traçables | 4 |
 | **Total** |  | **40** |
+| Bonus — WAF (OpenAppSec, mode local) | Ajout d’un WAF fonctionnel en frontal de Traefik, configuré en mode local et expliqué | **+2 (hors total)** |
 
 ## Attentes par critère
 
@@ -373,8 +375,9 @@ Les situations suivantes entraîneront une pénalité importante, voire l’éch
 - absence réelle de cloud-init malgré une revendication de VM as Code (0 à 1 point sur VM as Code);
 - vidéo dépassant 15 min 59 s (-2 points sur Qualité des livrables);
 - dépôt incomplet ou non exploitable (-3 points sur Déploiement conteneurisé, -2 points sur Qualité des livrables);
-- contributions individuelles non identifiables (-1 à -2 points sur Qualité des livrables);
-- dépendance non justifiée à un service cloud tiers, par exemple OpenAppSec en mode cloud (-2 points sur Reverse proxy et WAF, -1 point sur Architecture et schéma).
+- contributions individuelles non identifiables (-1 à -2 points sur Qualité des livrables).
+
+Le WAF (OpenAppSec) étant un bonus optionnel, une équipe qui ne l’implémente pas ne subit aucune pénalité. Si une équipe tente le WAF mais le configure en mode cloud (dépendance à un compte Check Point Infinity), le bonus de +2 points n’est simplement pas accordé, sans pénalité additionnelle sur les autres critères.
 
 ## Conseils de réalisation
 
