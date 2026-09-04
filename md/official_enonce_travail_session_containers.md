@@ -187,7 +187,8 @@ flowchart LR
     end
 
     Internet -->|"HTTP/HTTPS"| Proxy
-    Internet -.->|"bonus"| WAF -.-> Proxy
+    Internet -.->|"bonus"| WAF
+    WAF -.->|"bonus"| Proxy
     Proxy --> Drupal
     Proxy --> Moodle
     Proxy --> Keycloak
@@ -221,7 +222,7 @@ Aucune intégration comptable complète n’est requise. Aucune preuve de paieme
 
 ```mermaid
 sequenceDiagram
-    actor U as Utilisateur
+    participant U as Utilisateur
     participant D as Drupal Commerce
     participant N as n8n
     participant M as Moodle
@@ -253,7 +254,7 @@ Vous devez configurer **Keycloak** comme fournisseur d’identité. Le minimum a
 
 ```mermaid
 sequenceDiagram
-    actor U as Utilisateur
+    participant U as Utilisateur
     participant M as Moodle
     participant K as Keycloak
 
