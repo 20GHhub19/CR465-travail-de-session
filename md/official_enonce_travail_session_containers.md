@@ -163,6 +163,50 @@ Votre architecture devra montrer une séparation logique entre :
 
 Vous devrez être capables d’expliquer quels services communiquent entre eux, pourquoi ils en ont besoin, et quels accès sont volontairement interdits.
 
+```mermaid
+flowchart LR
+    Internet["Utilisateurs / Internet"]
+
+    subgraph Exposition["Réseau d'exposition"]
+        Proxy["Traefik (Reverse Proxy)"]
+        WAF["OpenAppSec (WAF, bonus)"]
+    end
+
+    subgraph Applicatif["Réseau applicatif"]
+        Drupal["Drupal Commerce"]
+        Moodle["Moodle"]
+        Keycloak["Keycloak"]
+        N8N["n8n"]
+        Portainer["Portainer CE"]
+        Opencast["Opencast (optionnel)"]
+    end
+
+    subgraph Donnees["Réseau de données"]
+        Postgres["PostgreSQL"]
+        Redis["Redis (bonus)"]
+    end
+
+    Internet -->|"HTTP/HTTPS"| Proxy
+    Internet -.->|"bonus"| WAF -.-> Proxy
+    Proxy --> Drupal
+    Proxy --> Moodle
+    Proxy --> Keycloak
+    Proxy --> N8N
+    Proxy --> Portainer
+
+    Drupal --> Postgres
+    Moodle --> Postgres
+    Keycloak --> Postgres
+    N8N --> Postgres
+    N8N -.->|"bonus"| Redis
+    Moodle -.-> Opencast
+
+    classDef optional stroke-dasharray:5,5;
+    class WAF,Opencast,Redis optional;
+```
+
+Aucun service du réseau de données (PostgreSQL, Redis) n'est directement joignable depuis Internet ou exposé par Traefik : seuls les services applicatifs y accèdent, en interne.
+
 ### 6. Intégration fonctionnelle sans codage avancé
 
 Votre solution doit démontrer un flux métier minimal cohérent :
@@ -174,6 +218,22 @@ Votre solution doit démontrer un flux métier minimal cohérent :
 - une consommation du contenu d’apprentissage dans Moodle.
 
 Aucune intégration comptable complète n’est requise. Aucune preuve de paiement réelle n’est exigée. L’évaluation portera sur la cohérence fonctionnelle, l’intégration visuelle et la sécurité de l’architecture, et non sur le développement applicatif.
+
+```mermaid
+sequenceDiagram
+    actor U as Utilisateur
+    participant D as Drupal Commerce
+    participant N as n8n
+    participant M as Moodle
+
+    U->>D: Consulte l'offre de formation
+    U->>D: Paiement (fictif / simulé / sandbox)
+    D->>N: Webhook "commande confirmée"
+    N->>M: Appel API (attribution / inscription accès)
+    M-->>N: Confirmation de l'attribution
+    N-->>D: Mise à jour du statut (optionnel)
+    U->>M: Consomme le contenu pédagogique
+```
 
 ### 7. Défense en profondeur
 
@@ -190,6 +250,22 @@ Votre plateforme doit montrer plusieurs couches de protection complémentaires, 
 ### 8. Identité et SSO
 
 Vous devez configurer **Keycloak** comme fournisseur d’identité. Le minimum attendu est un SSO fonctionnel entre Keycloak et Moodle. L’intégration SSO avec Drupal Commerce est souhaitable, mais elle peut être traitée comme une bonification ou comme une amélioration future si votre équipe préfère stabiliser d’abord le noyau de la plateforme.
+
+```mermaid
+sequenceDiagram
+    actor U as Utilisateur
+    participant M as Moodle
+    participant K as Keycloak
+
+    U->>M: Accède à une ressource protégée
+    M-->>U: Redirection (OIDC/SAML) vers Keycloak
+    U->>K: Authentification (identifiants)
+    K-->>U: Redirection avec jeton / assertion
+    U->>M: Callback avec jeton
+    M->>K: Validation du jeton
+    K-->>M: Jeton valide
+    M-->>U: Session ouverte (SSO établi)
+```
 
 ### 9. Observabilité et exploitation
 

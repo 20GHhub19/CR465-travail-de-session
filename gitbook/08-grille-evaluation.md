@@ -18,6 +18,32 @@ Voici comment votre travail sera évalué. Ce tableau est un résumé condensé 
 | **Total** |  | **40** |
 | **Bonus — WAF (OpenAppSec)** | Ajout d'un WAF fonctionnel en frontal de Traefik, configuré en mode local et expliqué — voir [6. Bonus — WAF](06-bonus-waf-openappsec.md) | **+2 (hors total)** |
 
+## Attentes par critère
+
+### VM as Code
+
+Le fichier cloud-init doit faire plus qu'installer quelques paquets. Il doit réellement illustrer une approche déclarative d'initialisation de la VM et éviter un maximum d'étapes manuelles répétitives.
+
+### Architecture et schéma
+
+Le schéma doit être lisible, légendé et cohérent avec ce qui est réellement déployé. Un schéma très beau mais non conforme au déploiement réel sera pénalisé.
+
+### Déploiement conteneurisé
+
+La stack doit être stable, compréhensible et assez mature pour être démontrée. La reproductibilité comptera davantage que la sophistication.
+
+### Sécurité des images et à l'exécution
+
+Les protections doivent être visibles dans le code, dans la configuration ou dans la démonstration. Il ne suffit pas d'écrire que le projet est « sécurisé ».
+
+### Intégration fonctionnelle
+
+Le scénario attendu doit démontrer un enchaînement réaliste entre la commande de formation dans Drupal Commerce, le workflow n8n et l'attribution d'un accès exploitable dans Moodle. La solution peut être partiellement simulée, mais elle doit être cohérente et démontrable.
+
+### Observabilité
+
+Portainer CE doit servir à visualiser l'environnement. Si vous ajoutez Loki, Grafana ou un autre mécanisme léger de journalisation, vous devez montrer en quoi cela vous aide à comprendre un comportement normal ou anormal, y compris dans le flux Drupal Commerce → n8n → Moodle.
+
 ## Pénalités majeures
 
 Certaines situations (secrets committés, conteneurs privilégiés, services sensibles exposés publiquement, etc.) entraînent des pénalités importantes — voir [9. Pénalités majeures](09-penalites-majeures.md) pour la liste complète.

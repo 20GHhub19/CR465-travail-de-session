@@ -22,6 +22,19 @@ La vidéo doit au minimum contenir :
 - la démonstration d'un volet d'observabilité ou de diagnostic;
 - les limites, difficultés et améliorations futures.
 
+### Contenu suggéré de la vidéo
+
+La structure suivante est fortement recommandée :
+
+1. Présentation de l'équipe et du mandat.
+2. Présentation de la VM as Code et du fichier cloud-init.
+3. Présentation de l'architecture logique et du schéma réseau.
+4. Démonstration du déploiement ou de l'environnement opérationnel.
+5. Démonstration de Drupal Commerce, du flux n8n, de Moodle et du SSO Keycloak.
+6. Présentation du reverse proxy et des protections choisies, et démonstration du WAF bonus si votre équipe l'a implémenté.
+7. Démonstration de Portainer CE et, si disponible, de la journalisation centralisée.
+8. Conclusion courte : limites, risques résiduels, apprentissages.
+
 ## 2. GitBook (le vôtre, à produire par votre équipe)
 
 Votre GitBook doit contenir une documentation structurée et lisible comprenant au minimum :

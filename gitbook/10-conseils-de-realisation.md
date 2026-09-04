@@ -30,3 +30,7 @@ Pour réussir ce travail, il est conseillé de procéder par étapes :
 7. préparer la vidéo comme une démonstration argumentée et non comme une simple visite d'écrans.
 
 Un projet simple, stable et bien expliqué sera mieux noté qu'un projet trop ambitieux, incomplet ou peu maîtrisé.
+
+## Rappel important
+
+Le but de ce travail n'est pas uniquement de faire fonctionner des conteneurs. Il s'agit de démontrer votre capacité à **penser l'architecture**, à **automatiser le socle**, à **réduire les risques**, à **justifier vos choix** et à **communiquer clairement un système conteneurisé sécurisé**.
