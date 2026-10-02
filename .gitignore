@@ -1,2 +1,20 @@
 .env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+
+# Volumes locaux, dumps de base
+**/data/ 
+*.sql
+*.dump
+
+# Artefact OS /éditeur
 .DS_Store
+*idea/
+.vscode/*
+:.vscode/extensions.json
+
+# Détection des secrets avant chaque commit
+docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest detect --source=/repo -v
