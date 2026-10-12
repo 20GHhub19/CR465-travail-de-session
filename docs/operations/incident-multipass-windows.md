@@ -7,19 +7,21 @@
 - `launch failed: Failed to copy ...vhdx` après bascule de moteur
 
 ## Cause
-Conflit entre **Hyper-V** (moteur Multipass par défaut) et **VirtualBox**
+1- Conflit entre **Hyper-V** (moteur Multipass par défaut) et **VirtualBox**
 installé en parallèle : réseau Hyper-V instable, puis image en cache au
 format `.vhdx` incompatible avec VirtualBox.
+2- Une VM installée sur Hyper-V non fonctionnelle et bloquant toute nouvelle installation de 
+   de VM et toute autre exécution avec multipass
 
 ## Contournement appliqué
-1. Réinstaller Multipass en choisissant le moteur **VirtualBox**.
-2. Désactiver Hyper-V : `bcdedit /set hypervisorlaunchtype off` + redémarrage.
-3. Vider le cache Multipass (PowerShell admin) :
+1. Désintallation de **`Multipass`** et **`VirtualBox`**, puis réinstallation de **`Multipass`**.
+2. Suppression de la VM **`vm-cr465-d`**  sur **Hyper-V**.
+3. Vidage du cache Multipass (PowerShell admin) :
    - `Stop-Service Multipass`
    - supprimer `C:\ProgramData\Multipass\data\vault\instances\<vm>`
    - supprimer `C:\ProgramData\Multipass\cache\*`
    - `Start-Service Multipass`
-4. Relancer : `bash scripts/launch-vm.sh <nom>`.
+4. Relancer : `./scripts/launch-vm.sh`.
 
 ## Leçon
 L'approche VM as Code (cloud-init) a permis de tout reconstruire à
