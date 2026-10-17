@@ -1,11 +1,11 @@
 #cloud-config
 # ============================================================
-# VM as Code - Plateforme pedagogique conteneurisee (CR465)
+# VM as Code - cr465-groupe-d pedagogique conteneurisee (CR465)
 # Initialise : utilisateur admin, SSH durci, maj, Docker,
 # pare-feu UFW, repertoires de travail, journalisation.
 # ============================================================
 
-hostname: plateforme
+hostname: cr465-groupe-d
 manage_etc_hosts: true
 
 # --- Utilisateur d'administration (cle SSH, sudo, pas de mot de passe) ---
@@ -42,7 +42,14 @@ write_files:
         "log-opts": { "max-size": "10m", "max-file": "3" },
         "no-new-privileges": true
       }
-    
+
+  # [AJOUT API-COMPAT] Autorise les clients Docker plus anciens (client embarque de Traefik v3.3)
+  - path: /etc/systemd/system/docker.service.d/api-compat.conf
+    permissions: '0644'
+    content: |
+      [Service]
+      Environment=DOCKER_MIN_API_VERSION=1.24
+
   # --- Durcissement SSH (en plus de ssh_pwauth: false) ---
   - path: /etc/ssh/sshd_config.d/99-hardening.conf
     content: |
@@ -82,6 +89,10 @@ runcmd:
     > /etc/apt/sources.list.d/docker.list
   - apt-get update
   - apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  # [AJOUT API-COMPAT] Recharger systemd pour prendre le drop-in, puis redemarrer Docker
+  - systemctl daemon-reload
+  - systemctl restart docker
+  
   # Pare-feu : on n'ouvre que SSH + HTTP + HTTPS
   - ufw default deny incoming
   - ufw default allow outgoing
@@ -90,8 +101,8 @@ runcmd:
   - ufw allow 443/tcp
   - ufw --force enable
   # Repertoires de travail
-  - mkdir -p /opt/plateforme/compose
-  - chown -R adminops:adminops /opt/plateforme
+  - mkdir -p /opt/cr465-groupe-d/compose
+  - chown -R adminops:adminops /opt/cr465-groupe-d
   # Services actifs
   - systemctl enable --now docker
   - systemctl enable --now fail2ban
