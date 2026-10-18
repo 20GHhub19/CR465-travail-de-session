@@ -1,7 +1,6 @@
 # Plateforme pédagogique conteneurisée sécurisée — CR465
 
-Travail de session (Polytechnique Montréal, CR465). Architecture multi-services
-conteneurisée (Docker Compose) sur une VM Linux provisionnée par cloud-init.
+Travail de session (Polytechnique Montréal, CR465 Groupe D). Architecture multi-services conteneurisée (Docker Compose) sur une VM Linux provisionnée par cloud-init.
 
 > **Référence** : l'énoncé et les grilles fournis par l'enseignant sont dans `md/`.
 > **Notre documentation** : technique dans `docs/`, livrable GitBook dans `gitbook/`.

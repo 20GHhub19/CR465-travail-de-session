@@ -16,11 +16,9 @@ format `.vhdx` incompatible avec VirtualBox.
 ## Contournement appliqué
 1. Désintallation de **`Multipass`** et **`VirtualBox`**, puis réinstallation de **`Multipass`**.
 2. Suppression de la VM **`vm-cr465-d`**  sur **Hyper-V**.
-3. Vidage du cache Multipass (PowerShell admin) :
-   - `Stop-Service Multipass`
-   - supprimer `C:\ProgramData\Multipass\data\vault\instances\<vm>`
-   - supprimer `C:\ProgramData\Multipass\cache\*`
-   - `Start-Service Multipass`
+3. Exécution de commande de suppression complète pour vérification :
+   - `multipass delete --all`
+   - `multipass purge`
 4. Relancer : `./scripts/launch-vm.sh`.
 
 ## Leçon
