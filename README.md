@@ -14,13 +14,15 @@ Travail de session (Polytechnique Montréal, CR465 Groupe D). Architecture multi
 | Segmentation réseau | ✅ 4 réseaux, `app` et `data` en `internal: true` |
 | Durcissement des conteneurs | ✅ `cap_drop: ALL`, non-root, `read_only`, limites, healthcheck |
 | socket-proxy | ✅ API Docker en lecture seule |
-| Applications métier (Drupal, Moodle, Keycloak, n8n, PostgreSQL, Portainer) | 🔶 à déployer (phase 4) |
+| PostgreSQL | ✅ opérationnel — 4 bases + 4 utilisateurs dédiés |
+| Keycloak + realm `cr465` | ✅ opérationnel — clients `moodle` et `drupal`, rôles, OIDC vérifié |
+| Applications métier (Drupal, Moodle, n8n, Portainer) | 🔶 à déployer (phase 4) |
 | Scan d'images (Trivy) | 🔶 script fourni (`scripts/scan-images.sh`), rapports à produire |
 
 ## Pile technique
 
-**Déployé** : Traefik · socket-proxy · service de test `whoami`
-**Cible** : Drupal Commerce · Moodle · Keycloak · n8n · PostgreSQL · Portainer CE
+**Déployé** : Traefik · socket-proxy · PostgreSQL · Keycloak (realm `cr465`) · service de test `whoami`
+**Cible** : Drupal Commerce · Moodle · n8n · Portainer CE
 **Bonus (non engagés)** : Redis · Grafana/Loki · OpenAppSec (WAF, mode local)
 
 > Le durcissement gVisor est **étudié mais non activé** : le script d'installation existe

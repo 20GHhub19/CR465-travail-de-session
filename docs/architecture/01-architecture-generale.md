@@ -67,8 +67,8 @@ flowchart TB
     classDef bonus fill:#d6c8f5,stroke:#4527a0,stroke-width:2px,stroke-dasharray:3 3,color:#311b92
     classDef zone fill:#f2f3f7,stroke:#8a8fa3,stroke-width:2px
 
-    class USERS,TRAEFIK deployed
-    class PORTAINER,DRUPAL,N8N,MOODLE,KEYCLOAK,PG toBuild
+    class USERS,TRAEFIK,PG,KEYCLOAK deployed
+    class PORTAINER,DRUPAL,N8N,MOODLE toBuild
     class WAF,REDIS bonus
 
     class EDGE,APP,DATA zone

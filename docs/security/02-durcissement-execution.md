@@ -12,7 +12,9 @@
 | `cap_add: NET_BIND_SERVICE` | `traefik` uniquement | Seule capacité nécessaire pour ouvrir les ports 80/443 |
 | `user: "1000:1000"` | `traefik` | Processus non-root |
 | `user: "65534:65534"` | `whoami` | Exécution en `nobody` |
-| `read_only: true` | `traefik`, `whoami`, `socket-proxy` | Système de fichiers du conteneur en lecture seule |
+| `read_only: true` | `traefik`, `whoami`, `socket-proxy`, `postgres` | Système de fichiers du conteneur en lecture seule |
+| `cap_add` ciblés | `postgres` : `CHOWN`, `DAC_OVERRIDE`, `FOWNER`, `SETGID`, `SETUID` | Nécessaires à l'entrypoint PostgreSQL pour préparer le volume |
+| Écart assumé : `read_only` absent | `keycloak` | Au premier démarrage, Keycloak reconstruit sa configuration Quarkus dans `/opt/keycloak/lib` : le système de fichiers doit être inscriptible. Compensé par un utilisateur non-root et un volume dédié |
 | `tmpfs: /tmp` | `traefik` | Zone d'écriture temporaire, non persistante |
 | `deploy.resources.limits` | tous les services | Plafond CPU / mémoire : limite l'impact d'un déni de service |
 | `healthcheck` | `traefik` | Redémarrage/diagnostic automatisable |
@@ -42,6 +44,7 @@ depuis Traefik est refusée.
 | `socket-proxy` garde un accès en lecture à l'API | Traefik en a besoin pour découvrir les conteneurs | Écriture désactivée (`POST: 0`), réseau `socket` isolé |
 | `whoami` n'a pas de healthcheck | Image `scratch` : aucun binaire interne pour tester | Healthcheck Traefik + `scripts/test-routing.sh` |
 | Certificat TLS auto-signé | Pas de nom de domaine public dans ce travail | Documenté ; remplaçable par Let's Encrypt en production |
+| Keycloak non `read_only` | Reconstruction Quarkus au premier démarrage | Utilisateur non-root, volume dédié, limites de ressources |
 
 ## 4. Vérifications rapides
 
