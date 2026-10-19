@@ -10,7 +10,7 @@
 | Pseudo Git | `fokomaximejoel` |
 | Nom | Maxime |
 | Branche | `Projet-CR465-D-Maxime` |
-| Commits | **24** |
+| Commits | signés SSH, vérifiés « Verified » par GitHub |
 | Fichiers distincts touchés | **77** |
 | Verticales | architecture, sécurité, base de données, identité, SSO, intégrations, livrables |
 
@@ -33,7 +33,7 @@ avance à chaque commit) :
 
 ## 2 bis. Signatures
 
-Depuis la réécriture du 19 octobre 2026, **les 26 commits de l'auteur sont signés en SSH**
+Depuis la réécriture du 19 octobre 2026, **tous les commits de l'auteur sont signés en SSH**
 (`gpg.format = ssh`, clé `~/.ssh/id_ed25519_cr465_signing`). Vérification locale :
 
 ```bash
