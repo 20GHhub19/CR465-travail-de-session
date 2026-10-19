@@ -1,57 +1,144 @@
 # ============================================================
-# Stack CR465 - Phase 3 : reseaux + Traefik + page de test
-# Reverse proxy Traefik + service de test whoami
-# Segmentation en 3 reseaux : edge (expose), app (applicatif), data (interne)
-#============================================================
+# Stack CR465 - Phase 3 durcie : reseaux + Traefik + socket-proxy + test
+# Segmentation : edge (expose) / app (internal) / data (internal) / socket (internal)
+# Durcissement : images epinglees, cap_drop ALL, no-new-privileges,
+#                read_only, limites CPU/RAM, healthcheck, logs bornes
+# ============================================================
+
+# --- Options de securite communes a tous les services ---------
+x-durcissement: &durcissement
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
 
 networks:
-  edge:            # seul reseau relie a l'exterieur (ports 80/443)
+  edge:            # seul reseau relie a l'exterieur (ports 80/443 publies)
   app:             # communication applicative (Traefik <-> services)
+    internal: true # aucun acces Internet : les services ne peuvent pas sortir
   data:
-    internal: true # aucun acces exterieur : reserve aux bases de donnees (Phase 4+)
+    internal: true # reserve aux bases de donnees (phase 4+)
+  socket:
+    internal: true # Traefik <-> socket-proxy uniquement
 
 services:
-  traefik:
-    image: traefik:v3.3
-    container_name: traefik
-    restart: unless-stopped
-      # Force une version d'API Docker acceptee par le daemon recent.
-      # Sans cela, Traefik negocie en 1.24 --> rejete --> aucun routeur cree.
-      # NB: compatibilite d'API Docker geree cote DEMON via le cloud-init
-      #     (/etc/systemd/system/docker.service.d/api-compat.conf -> DOCKER_MIN_API_VERSION=1.24)
+  # ------------------------------------------------------------------
+  # socket-proxy : expose l'API Docker en LECTURE SEULE a Traefik.
+  # Evite de monter /var/run/docker.sock en direct : le mode :ro sur un
+  # socket Unix n'empeche PAS les ecritures via l'API HTTP.
+  # ------------------------------------------------------------------
+  socket-proxy:
+    <<: *durcissement
+    image: tecnativa/docker-socket-proxy:v0.5.0
+    container_name: cr465-socket-proxy
+    read_only: true
+    tmpfs:
+      - /tmp          # l'entrypoint ecrit /tmp/haproxy.cfg
+      - /run          # haproxy ecrit son pidfile /run/haproxy.pid
+    environment:
+      CONTAINERS: 1   # lecture des conteneurs (necessaire a Traefik)
+      SERVICES: 1
+      NETWORKS: 1
+      EVENTS: 1
+      VERSION: 1      # Traefik negocie la version de l'API via /version
+      INFO: 1
+      PING: 1
+      POST: 0         # AUCUNE ecriture : creation/modification impossible
+      LOG_LEVEL: warning
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - socket
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 64M
 
+  # ------------------------------------------------------------------
+  # Traefik : unique point d'entree HTTP/HTTPS
+  # ------------------------------------------------------------------
+  traefik:
+    <<: *durcissement
+    image: traefik:v3.7.15          # version de correctif epinglee
+    container_name: cr465-traefik
+    user: "1000:1000"              # non-root (uid/gid de l'utilisateur admin)
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_add:
+      - NET_BIND_SERVICE           # seule capacite conservee : ports < 1024
+    environment:
+      # Negociation explicite de l'API Docker : sinon le client demande 1.24,
+      # refuse par les moteurs recents (minimum 1.40 depuis Docker 25+).
+      DOCKER_API_VERSION: "1.44"
     command:
-      # Decouverte automatique des conteneurs via le socket Docker
+      # --- decouverte des conteneurs via le proxy filtre (pas le socket brut)
       - --providers.docker=true
-      - --providers.docker.exposedbydefault=false   # rien expose sauf label explicite
-      # Points d'entree
+      - --providers.docker.endpoint=tcp://socket-proxy:2375
+      - --providers.docker.exposedbydefault=false
+      # --- points d'entree
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
-      # Redirection systematique HTTP -> HTTPS
+      # --- redirection systematique HTTP -> HTTPS
       - --entrypoints.web.http.redirections.entrypoint.to=websecure
       - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      # --- journalisation d'acces en JSON (exploitable plus tard par Loki)
+      - --accesslog=true
+      - --accesslog.format=json
+      - --accesslog.fields.headers.defaultmode=drop
+      - --log.level=INFO
+      # --- endpoint de sante interne (non publie)
+      - --ping=true
     ports:
       - "80:80"
       - "443:443"
     networks:
       - edge
       - app
-    security_opt:
-      - no-new-privileges:true                       # durcissement : pas d'escalade
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro # socket en LECTURE SEULE
+      - socket
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
 
+  # ------------------------------------------------------------------
+  # whoami : service de TEST du routage (a retirer avant la remise finale)
+  # ------------------------------------------------------------------
   whoami:
-    image: traefik/whoami
-    container_name: whoami
-    restart: unless-stopped
+    <<: *durcissement
+    image: traefik/whoami:v1.12.0   # version epinglee (plus de :latest)
+    container_name: cr465-whoami
+    user: "65534:65534"             # nobody
+    read_only: true
+    environment:
+      WHOAMI_PORT_NUMBER: "8080"    # port non privilegie -> compatible non-root
     networks:
-      - app                                          # jamais expose directement
-    security_opt:
-      - no-new-privileges:true
+      - app                         # jamais expose directement : passe par Traefik
     labels:
       - traefik.enable=true
       - traefik.http.routers.whoami.rule=Host(`whoami.cr465.test`)
       - traefik.http.routers.whoami.entrypoints=websecure
-      - traefik.http.routers.whoami.tls=true         # cert auto-signe par defaut
-      - traefik.http.services.whoami.loadbalancer.server.port=80
+      - traefik.http.routers.whoami.tls=true
+      - traefik.http.services.whoami.loadbalancer.server.port=8080
+    deploy:
+      resources:
+        limits:
+          cpus: "0.10"
+          memory: 32M
+    # Pas de healthcheck : l'image est "scratch" (aucun shell ni binaire HTTP
+    # disponible a l'interieur). Le healthcheck de Traefik couvre le proxy ;
+    # scripts/test-routing.sh couvre le routage vers whoami.
