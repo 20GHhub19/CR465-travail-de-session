@@ -32,10 +32,14 @@ flowchart TB
         REDIS[("Redis<br/>bonus")]
     end
 
+    subgraph EGR["RÉSEAU EGRESS — sortie contrôlée"]
+        EGRN["Internet sortant<br/>uniquement Moodle (dépendances)<br/>et n8n (webhooks)"]
+    end
+
     subgraph FORBID["⛔ FLUX VOLONTAIREMENT INTERDITS"]
         F1["Internet → PostgreSQL / Redis"]
         F2["Traefik → PostgreSQL"]
-        F3["Service applicatif → Internet"]
+        F3["Service applicatif → Internet<br/>hors réseau egress"]
         F4["Traefik → socket Docker brut"]
         F5["Portainer hors allowlist IP"]
     end
@@ -57,6 +61,7 @@ flowchart TB
     N8N -->|"SQL"| PG
     N8N -.->|"cache"| REDIS
 
+    MOODLE -.->|"sortie contrôlée"| EGRN
     DRUPAL -.->|"webhook commande"| N8N
     N8N -.->|"API REST"| MOODLE
     KC -.->|"OIDC"| MOODLE
@@ -75,7 +80,8 @@ flowchart TB
     class PG data
     class WAF,REDIS bonus
     class F1,F2,F3,F4,F5 interdit
-    class EDGE,APP,OPS,DATA,FORBID zone
+    class EGRN exposed
+    class EDGE,APP,OPS,DATA,EGR,FORBID zone
 
     subgraph LEG["LÉGENDE"]
         L1["Déployé et vérifiable dans le dépôt"]
@@ -100,12 +106,14 @@ flowchart TB
 | `app` | Drupal, Moodle, Keycloak, n8n | `internal: true` — aucune sortie Internet |
 | `ops` | Portainer, socket-proxy | Administration isolée, accès restreint par IP |
 | `data` | PostgreSQL (+ Redis bonus) | `internal: true`, jamais exposé, jamais routé par Traefik |
+| `socket` | Traefik ↔ socket-proxy, Portainer ↔ socket-proxy-admin | `internal: true` |
+| `egress` | Moodle, n8n | **Sortie Internet contrôlée** : seuls les services qui en ont besoin |
 
 ## Flux volontairement interdits
 
 1. Internet → PostgreSQL / Redis
 2. Traefik → PostgreSQL
-3. Service applicatif → Internet (réseaux `internal: true`)
+3. Service applicatif → Internet **hors réseau `egress`** (les autres réseaux sont `internal: true`)
 4. Traefik → socket Docker brut (passage obligé par le socket-proxy, en lecture seule)
 5. Portainer hors de la liste d'IP autorisées
 
@@ -118,6 +126,6 @@ flowchart TB
 | Réseau `socket` + `docker-socket-proxy` (`POST: 0`) | ✅ appliqué |
 | Portainer restreint par IP | 🔶 à faire au déploiement de Portainer |
 
-**Conséquence à assumer** : `app` interne signifie que **n8n ne peut pas sortir sur Internet**.
-C'est acceptable ici (paiement simulé, tous les services sont locaux). Si un appel sortant devenait
-nécessaire, créer un réseau `egress` dédié à n8n et le justifier par écrit.
+**Exception documentée** : Moodle a besoin d'Internet **pendant son installation** (dépendances
+Composer) et n8n en aura besoin pour ses webhooks sortants. Un réseau `egress` dédié a donc été
+créé et n'est rattaché qu'à ces deux services. Les autres restent strictement internes.

@@ -17,7 +17,7 @@ flowchart TB
     C3["COUCHE 3 — APPLICATIF (app · internal)<br/>non-root · no-new-privileges · cap_drop ALL · read_only · limites · healthcheck"]
     C4["COUCHE 4 — DONNÉES (data · internal)<br/>PostgreSQL 17.11 · 1 base + 1 user par service · jamais exposé"]
     C5["COUCHE 5 — IDENTITÉ<br/>Keycloak 26.8 · realm cr465 · clients Moodle et Drupal"]
-    C6["COUCHE 6 — OBSERVABILITÉ<br/>Portainer CE · access log JSON · Loki / Grafana — bonus"]
+    C6["COUCHE 6 — OBSERVABILITÉ<br/>Portainer CE deploye · access log JSON · Loki / Grafana — bonus"]
 
     SERVICE["Service rendu à l'utilisateur légitime"]
 
@@ -39,8 +39,8 @@ flowchart TB
     classDef bookend fill:#eceff1,stroke:#37474f,stroke-width:2px,color:#263238
 
     class C1,C4 deployed
-    class C2,C3,C5 partial
-    class C0,C4,C6 toBuild
+    class C2,C3,C5,C6 partial
+    class C0 toBuild
     class MENACE,SERVICE bookend
     class G1 deployed
     class G2 partial
@@ -57,9 +57,9 @@ flowchart TB
 | 1 — HÔTE | UFW 22/80/443, SSH par clé, root off, fail2ban, unattended-upgrades, sysctl, logs Docker bornés | **Déployé** (cloud-init) |
 | 2 — PÉRIMÈTRE | Traefik TLS ≥ 1.2, `exposedByDefault=false`, HSTS, WAF bonus | **Partiel** (WAF absent) |
 | 3 — APPLICATIF | non-root, `no-new-privileges`, `cap_drop: ALL`, `read_only`, limites, healthcheck | **Appliqué** dans le compose |
-| 4 — DONNÉES | PostgreSQL jamais exposé, 1 base + 1 user par service | Cible |
-| 5 — IDENTITÉ | Keycloak OIDC, rôles, MFA possible | Cible (non configuré) |
-| 6 — OBSERVABILITÉ | Portainer, access log JSON, Loki/Grafana | Cible (absent) |
+| 4 — DONNÉES | PostgreSQL jamais exposé, 1 base + 1 user par service | **Déployé** (4 bases, 4 rôles) |
+| 5 — IDENTITÉ | Keycloak OIDC, rôles, clients Moodle/Drupal | **Déployé** (realm importé, OIDC vérifié) |
+| 6 — OBSERVABILITÉ | Portainer, access log JSON, Loki/Grafana | **Partiel** (Portainer déployé, Loki absent) |
 
 ## Risque résiduel à documenter
 

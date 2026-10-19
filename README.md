@@ -16,13 +16,15 @@ Travail de session (Polytechnique Montréal, CR465 Groupe D). Architecture multi
 | socket-proxy | ✅ API Docker en lecture seule |
 | PostgreSQL | ✅ opérationnel — 4 bases + 4 utilisateurs dédiés |
 | Keycloak + realm `cr465` | ✅ opérationnel — clients `moodle` et `drupal`, rôles, OIDC vérifié |
-| Applications métier (Drupal, Moodle, n8n, Portainer) | 🔶 à déployer (phase 4) |
+| Moodle | ✅ opérationnel (Moodle 5.3, installé automatiquement, page de connexion FR) |
+| Portainer CE | ✅ opérationnel (accès `admin.<domaine>` restreint par IP) |
+| Applications métier restantes (Drupal, n8n) | 🔶 à déployer |
 | Scan d'images (Trivy) | 🔶 script fourni (`scripts/scan-images.sh`), rapports à produire |
 
 ## Pile technique
 
-**Déployé** : Traefik · socket-proxy · PostgreSQL · Keycloak (realm `cr465`) · service de test `whoami`
-**Cible** : Drupal Commerce · Moodle · n8n · Portainer CE
+**Déployé** : Traefik · socket-proxy (RO + RW) · PostgreSQL · Keycloak · Moodle · Portainer CE · service de test `whoami`
+**Cible** : Drupal Commerce · n8n
 **Bonus (non engagés)** : Redis · Grafana/Loki · OpenAppSec (WAF, mode local)
 
 > Le durcissement gVisor est **étudié mais non activé** : le script d'installation existe
@@ -61,7 +63,7 @@ cp compose/.env.example compose/.env   # puis remplir compose/.env
 | `compose/` | services et configurations Docker Compose |
 | `docs/architecture/` | schémas (architecture, segmentation, séquences, défense en profondeur) |
 | `docs/security/` | sécurité des images, durcissement, rapports de scan |
-| `docs/operations/` | procédures et incidents |
+| `docs/operations/` | ordre de déploiement, procédures et incidents |
 | `gitbook/` | documentation GitBook (livrable) |
 | `md/` | énoncé et grilles de référence (fournis) |
 | `scripts/` | lancement, déploiement, tests, scan d'images |

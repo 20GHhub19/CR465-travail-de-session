@@ -6,6 +6,59 @@
 
 ---
 
+## Sprint D — Moodle, Portainer et sortie contrôlée (19 octobre 2026)
+
+### Ajouts
+
+| Élément | Détail |
+|---|---|
+| Service `moodle` | `erseco/alpine-moodle:v5.3.0`, installation automatique au premier démarrage (499 tables créées), nginx + php-fpm, port interne 8080 |
+| Service `portainer` | `portainer/portainer-ce:2.45.2`, connecté à `socket-proxy-admin`, accès via `admin.<domaine>` restreint par allowlist IP |
+| Service `socket-proxy-admin` | API Docker en lecture **et écriture**, réservé à Portainer, réseau `socket` |
+| Réseau `egress` | Sortie Internet contrôlée, rattachée uniquement à Moodle (dépendances) et n8n (webhooks) |
+| Volume `portainer_data` | Persistance de la configuration Portainer |
+| Volumes `moodle_data`, `moodle_html` | Persistance des données et du code Moodle |
+
+### Modifications
+
+- `compose/docker-compose.yml` : noms de réseaux explicites (`cr465_edge`, `cr465_app`, `cr465_data`, `cr465_socket`, `cr465_egress`) pour un routage déterministe.
+- `.env.example` : ajout de `ADMIN_ALLOWLIST` (IP autorisées sur les interfaces d'administration).
+- Schémas 01, 02 et 05 : Moodle et Portainer passés en « déployé », réseau `egress` représenté.
+
+### Justification
+
+- **Portainer exige l'écriture sur l'API Docker** : il ne peut pas fonctionner avec un proxy en lecture seule. D'où une seconde instance `socket-proxy-admin`, isolée et réservée à lui.
+- **Réseau `egress`** : Moodle télécharge ses dépendances Composer à l'installation ; sans sortie, l'installation échoue (`Could not resolve host: api.github.com`). L'exception est limitée à deux services et documentée.
+- **Noms de réseaux explicites** : un conteneur multi-réseaux (Moodle en a trois) doit indiquer à Traefik lequel utiliser, sinon le routeur n'est pas créé.
+- **Moodle sur port 8080** : l'image expose nginx sur 8080, pas 80 ; le label Traefik et le healthcheck ont été alignés.
+
+### Vérifications effectuées
+
+| Test | Résultat |
+|---|---|
+| Tous les conteneurs | `postgres (healthy)`, `keycloak (healthy)`, `moodle (healthy)`, `traefik (healthy)`, `portainer Up` |
+| `https://lms.cr465.test` | **303** → page de connexion Moodle (interface en français) |
+| `https://admin.cr465.test` | **307** (redirection Portainer, UI servie) |
+| `https://auth.cr465.test/realms/cr465/...` | **302** (flux OIDC) |
+| `https://whoami.cr465.test` | **200** |
+| Installation Moodle | 499 tables créées dans la base `moodle` |
+
+### Incidents rencontrés et corrigés
+
+1. `MOODLE_SITENAME` avec espaces → l'image passe la valeur en argument CLI, échec `Options non reconnues`. Corrigé en `CR465-Formation`.
+2. Moodle en échec d'installation sans Internet (réseaux `internal`) → création du réseau `egress`.
+3. Routeur Traefik absent pour Moodle → conteneur multi-réseaux : ajout de `traefik.docker.network`.
+4. Healthcheck Moodle en échec (303 interprété comme erreur) → test HTTP acceptant 2xx et 3xx.
+
+### Reste à faire (Sprint E)
+
+- Drupal Commerce (boutique, paiement simulé).
+- n8n (workflow webhook → API Moodle).
+- Module OIDC côté Moodle (brancher le client `moodle` déjà créé dans Keycloak).
+- Suppression de `whoami`, GitBook, vidéo, document de synthèse.
+
+---
+
 ## Sprint C — Socle de données et identité (19 octobre 2026)
 
 ### Ajouts

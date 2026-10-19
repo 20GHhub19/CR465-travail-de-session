@@ -42,6 +42,8 @@ depuis Traefik est refusée.
 |---|---|---|
 | L'utilisateur `adminops` est dans le groupe `docker` | Nécessaire pour piloter Docker sans `sudo` | Compte à clé SSH uniquement, root SSH désactivé, fail2ban |
 | `socket-proxy` garde un accès en lecture à l'API | Traefik en a besoin pour découvrir les conteneurs | Écriture désactivée (`POST: 0`), réseau `socket` isolé |
+| **`socket-proxy-admin` autorise l'écriture** | Portainer doit créer/arrêter des conteneurs : impossible en lecture seule | Instance séparée, réseau `socket` isolé, accès réservé à Portainer, UI restreinte par allowlist IP |
+| **Réseau `egress` ouvert** | Moodle télécharge ses dépendances à l'installation ; n8n doit joindre des webhooks | Réseau dédié rattaché à ces deux services seulement, tous les autres restent `internal: true` |
 | `whoami` n'a pas de healthcheck | Image `scratch` : aucun binaire interne pour tester | Healthcheck Traefik + `scripts/test-routing.sh` |
 | Certificat TLS auto-signé | Pas de nom de domaine public dans ce travail | Documenté ; remplaçable par Let's Encrypt en production |
 | Keycloak non `read_only` | Reconstruction Quarkus au premier démarrage | Utilisateur non-root, volume dédié, limites de ressources |
