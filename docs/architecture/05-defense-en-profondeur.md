@@ -1,52 +1,68 @@
-# Défense en profondeur — 4 couches de protection
+# Schéma 5 — Défense en profondeur
 
-> Schéma de synthèse sécurité : chaque couche est une barrière indépendante.
-> C'est le schéma de référence pour la vidéo et le document de synthèse.
+> **État au 19 octobre 2026.** Déployé et vérifié dans le dépôt : Traefik + un service de test
+> (`whoami`). Tout le reste est une **cible** : les éléments non encore déployés sont en
+> pointillé et signalés « non déployé ». Mettre ce schéma à jour à chaque ajout réel de service.
+
+**Objectif** : montrer que la sécurité est répartie en couches indépendantes — un attaquant doit
+réussir sept fois de suite.
 
 ```mermaid
-%% ============================================================
-%% Schéma 5 - Défense en profondeur (4 couches)
-%% Couche 0 Hôte / 1 Périmètre / 2 Applicatif / 3 Données
-%% ============================================================
 flowchart TB
-    subgraph L0["COUCHE 0 - Hôte (VM Linux, cloud-init)"]
+    MENACE["Menace : accès non autorisé · service compromis · fuite de données"]
+
+    C0["COUCHE 0 — BUILD (shift-left)<br/>images épinglées · scan Trivy — absent · aucun secret versionné"]
+    C1["COUCHE 1 — HÔTE (cloud-init)<br/>UFW 22/80/443 · SSH par clé, root off · fail2ban · unattended-upgrades"]
+    C2["COUCHE 2 — PÉRIMÈTRE (edge)<br/>Traefik TLS ≥ 1.2 · exposedByDefault=false · HSTS · WAF bonus non déployé"]
+    C3["COUCHE 3 — APPLICATIF (app · internal)<br/>non-root · no-new-privileges · cap_drop ALL · limites · healthchecks"]
+    C4["COUCHE 4 — DONNÉES (data · internal)<br/>PostgreSQL jamais exposé · 1 base + 1 user par service · volumes nommés"]
+    C5["COUCHE 5 — IDENTITÉ<br/>Keycloak OIDC · rôles etudiant / enseignant · MFA possible"]
+    C6["COUCHE 6 — OBSERVABILITÉ<br/>Portainer CE · access log JSON · Loki / Grafana — bonus"]
+
+    SERVICE["Service rendu à l'utilisateur légitime"]
+
+    MENACE --> C0 --> C1 --> C2 --> C3 --> C4 --> C5 --> C6 --> SERVICE
+
+    subgraph LEG["LÉGENDE"]
         direction LR
-        FW["Pare-feu UFW<br/>22/80/443 seulement"]
-        SSH["SSH par clé<br/>root désactivé"]
-        GV["Runtime gVisor<br/>(runsc)"]
+        G1["Déployé et vérifiable"]
+        G2["Prévu — à vérifier"]
+        G3["Absent — à implémenter"]
+        G4["Bonus — non engagé"]
     end
 
-    Internet["Utilisateurs / Internet"]
+    classDef deployed fill:#b9e4bf,stroke:#1b5e20,stroke-width:3px,color:#0d3b12
+    classDef partial fill:#ffe08a,stroke:#b26a00,stroke-width:2px,color:#5a3600
+    classDef toBuild fill:#ffd6a5,stroke:#c2410c,stroke-width:2px,stroke-dasharray:6 4,color:#7c2d12
+    classDef bonus fill:#d6c8f5,stroke:#4527a0,stroke-width:2px,stroke-dasharray:3 3,color:#311b92
+    classDef zone fill:#f2f3f7,stroke:#8a8fa3,stroke-width:2px
+    classDef bookend fill:#eceff1,stroke:#37474f,stroke-width:2px,color:#263238
 
-    subgraph L1["COUCHE 1 - Périmètre (réseau edge)"]
-        WAF["OpenAppSec WAF<br/>(bonus, mode local)"]
-        TR["Traefik<br/>TLS / HTTPS<br/>point d'entrée unique"]
-    end
-
-    subgraph L2["COUCHE 2 - Applicatif (réseau app)"]
-        direction LR
-        APPS["Drupal / Moodle / Keycloak / n8n / Portainer<br/>non-root - no-new-privileges<br/>cap_drop ALL - ressources limitées"]
-    end
-
-    subgraph L3["COUCHE 3 - Données (réseau data, internal)"]
-        DB["PostgreSQL / Redis<br/>jamais exposés<br/>1 base + 1 user par service"]
-    end
-
-    IAM["Keycloak<br/>IAM / SSO (OIDC)"]
-
-    Internet -->|"HTTPS"| WAF
-    WAF -->|"bonus"| TR
-    Internet -->|"HTTPS"| TR
-    TR --> APPS
-    APPS --> DB
-    APPS -. "auth OIDC" .-> IAM
-
-    classDef host fill:#FFF2CC,stroke:#D6B656;
-    classDef edge fill:#DAE8FC,stroke:#6C8EBF;
-    classDef app fill:#D5E8D4,stroke:#82B366;
-    classDef data fill:#F8CECC,stroke:#B85450;
-    class L0 host;
-    class L1 edge;
-    class L2 app;
-    class L3 data;
+    class C1 deployed
+    class C2,C3,C5 partial
+    class C0,C4,C6 toBuild
+    class MENACE,SERVICE bookend
+    class G1 deployed
+    class G2 partial
+    class G3 toBuild
+    class G4 bonus
+    class LEG zone
 ```
+
+## Les sept couches
+
+| Couche | Contrôles | État vérifié |
+|---|---|---|
+| 0 — BUILD | Images épinglées, scan local, aucun secret versionné | Scan **absent** |
+| 1 — HÔTE | UFW 22/80/443, SSH par clé, root off, fail2ban, unattended-upgrades, sysctl, logs Docker bornés | **Déployé** (cloud-init) |
+| 2 — PÉRIMÈTRE | Traefik TLS ≥ 1.2, `exposedByDefault=false`, HSTS, WAF bonus | **Partiel** (WAF absent) |
+| 3 — APPLICATIF | non-root, `no-new-privileges`, `cap_drop: ALL`, limites, healthchecks | **Partiel** (`cap_drop` et limites absents) |
+| 4 — DONNÉES | PostgreSQL jamais exposé, 1 base + 1 user par service | Cible |
+| 5 — IDENTITÉ | Keycloak OIDC, rôles, MFA possible | Cible (non configuré) |
+| 6 — OBSERVABILITÉ | Portainer, access log JSON, Loki/Grafana | Cible (absent) |
+
+## Risque résiduel à documenter
+
+- L'utilisateur `adminops` appartient au groupe `docker` : sur l'hôte, cela équivaut à **root**.
+- Le socket Docker est aujourd'hui monté en direct dans Traefik : le mode `:ro` **n'empêche pas**
+  les écritures via l'API. Correctif : `docker-socket-proxy` en lecture seule.
