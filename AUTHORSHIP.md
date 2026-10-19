@@ -24,6 +24,10 @@
 | Bundle Git `fokomaximejoel.bundle` (SHA-256) | `1d0bda443b4523cc21226704f34f0c4ceddefe4084d2bd77a88f8ac57fbfae79` |
 | Étiquette annotée | `empreinte-maxime-v1` |
 
+> **Point de référence** : l'étiquette annotée `empreinte-maxime-v1` pointe sur le commit
+> `014c618`. Les empreintes ci-dessus décrivent exactement cet état : c'est cette étiquette —
+> et non la tête de branche, qui avance à chaque commit — qu'un tiers doit vérifier.
+
 > Le bundle (`authorship/fokomaximejoel.bundle`, 7,6 Mo) **n'est pas versionné** : il doit être
 > conservé hors du dépôt (courriel à soi-même, cloud personnel, clé USB). C'est cette copie qui
 > protège contre la réécriture de l'historique.
