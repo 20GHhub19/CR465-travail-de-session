@@ -105,13 +105,28 @@ services:
       - --log.level=INFO
       # --- endpoint de sante interne (non publie)
       - --ping=true
+      # --- configuration dynamique (certificat par defaut)
+      - --providers.file.directory=/etc/traefik/dynamic
+      - --providers.file.watch=true
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      - ./traefik/dynamic:/etc/traefik/dynamic:ro
+      - ./traefik/certs:/certs:ro
     networks:
-      - edge
-      - app
-      - socket
+      edge: {}
+      app:
+        # Alias DNS internes : les conteneurs resolvent *.cr465.test vers Traefik,
+        # ce qui permet a Moodle de joindre Keycloak en HTTPS sans DNS externe.
+        aliases:
+          - auth.cr465.test
+          - lms.cr465.test
+          - shop.cr465.test
+          - flow.cr465.test
+          - admin.cr465.test
+          - whoami.cr465.test
+      socket: {}
     healthcheck:
       test: ["CMD", "traefik", "healthcheck", "--ping"]
       interval: 30s
@@ -348,6 +363,8 @@ services:
     volumes:
       - moodle_data:/var/www/moodledata
       - moodle_html:/var/www/html
+      - ./traefik/certs/cr465-ca.crt:/certs/cr465-ca.crt:ro
+      - ./moodle/php/99-cr465.ini:/etc/php84/conf.d/99-cr465.ini:ro
     depends_on:
       postgres:
         condition: service_healthy

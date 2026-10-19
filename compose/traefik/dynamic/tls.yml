@@ -1,0 +1,13 @@
+# Certificat par defaut servi par Traefik.
+# Genere par scripts/gen-certs.sh (AC locale + wildcard *.cr465.test).
+# Sans ce fichier, Traefik utilise son certificat auto-signe interne,
+# que Moodle refuse de valider.
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certs/cr465.crt
+        keyFile: /certs/cr465.key
+  certificates:
+    - certFile: /certs/cr465.crt
+      keyFile: /certs/cr465.key
