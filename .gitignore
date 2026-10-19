@@ -32,3 +32,6 @@ ssh-keygen.sh
 # Dossiers internes non livrables
 md/operations/
 scripts/vm-provision/
+
+# Workflow n8n genere avec le jeton Moodle (voir scripts/render-n8n-workflow.sh)
+compose/n8n/workflows/commande-moodle.json

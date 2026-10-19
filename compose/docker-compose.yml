@@ -392,9 +392,77 @@ services:
       - traefik.http.services.moodle.loadbalancer.server.port=8080
       - traefik.docker.network=cr465_app
 
+  # ------------------------------------------------------------------
+  # n8n : orchestration (webhook Drupal -> API Moodle)
+  # ------------------------------------------------------------------
+  n8n:
+    <<: *durcissement
+    image: n8nio/n8n:1.123.85
+    container_name: cr465-n8n
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /home/node/.cache:mode=1777   # n8n y ecrit son cache (mode permissif requis)
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: "5432"
+      DB_POSTGRESDB_DATABASE: ${N8N_DB_NAME}
+      DB_POSTGRESDB_USER: ${N8N_DB_USER}
+      DB_POSTGRESDB_PASSWORD: ${N8N_DB_PASSWORD}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      N8N_HOST: flow.${BASE_DOMAIN}
+      N8N_PROTOCOL: https
+      N8N_PORT: "5678"
+      WEBHOOK_URL: https://flow.${BASE_DOMAIN}/
+      N8N_PROXY_HOPS: "1"
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_PERSONALIZATION_ENABLED: "false"
+      GENERIC_TIMEZONE: America/Toronto
+      # variables utilisees par le workflow
+      # autorise les expressions {{ $env.X }} dans les noeuds : le jeton Moodle
+      # n'est jamais ecrit dans le workflow (il vient du .env)
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+      # Moodle redirige HTTP -> HTTPS (wwwroot https) : on passe par le nom public
+      # interne (alias DNS) et on fait confiance a l'AC du projet.
+      NODE_EXTRA_CA_CERTS: /certs/cr465-ca.crt
+      MOODLE_INTERNAL_URL: https://lms.${BASE_DOMAIN}
+      MOODLE_WS_TOKEN: ${MOODLE_WS_TOKEN:-}
+      MOODLE_COURSE_ID: ${MOODLE_COURSE_ID:-2}
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/workflows:/workflows:ro
+      - ./traefik/certs/cr465-ca.crt:/certs/cr465-ca.crt:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app
+      - data
+      - egress
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:5678/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.n8n.rule=Host(`flow.${BASE_DOMAIN}`)
+      - traefik.http.routers.n8n.entrypoints=websecure
+      - traefik.http.routers.n8n.tls=true
+      - traefik.http.services.n8n.loadbalancer.server.port=5678
+      - traefik.docker.network=cr465_app
+
 volumes:
   postgres_data:
   keycloak_data:
   portainer_data:
   moodle_data:
   moodle_html:
+  n8n_data:
