@@ -1,0 +1,24 @@
+
+=== EMPREINTE D'AUTEUR ===
+Auteur          : fokomaximejoel
+Branche         : empreinte-maxime-v2
+Commits         : 27
+Fichiers        : 81
+
+HEAD            : b1a3c6ed307c2650e2160f0a7c84a367c52d6cae
+Arbre (tree)    : 51b5fb9416c858cd809205f443971590c1b13593
+
+Manifeste       : authorship/fokomaximejoel-commits.txt
+SHA-256         : a5e95fa6f7556fce2ee976e8d1a954956a64a5ffc25719454c5abd63e0eb6455
+
+Bundle Git      : authorship/fokomaximejoel.bundle (7.6M)
+SHA-256         : 9853c1a5e38d03c96fbbcafd2663bb856a540759dc975fc3948ee69a93cb49fe
+
+Vérification par un tiers :
+  shasum -a 256 -c <<< "9853c1a5e38d03c96fbbcafd2663bb856a540759dc975fc3948ee69a93cb49fe  authorship/fokomaximejoel.bundle"
+  git bundle verify authorship/fokomaximejoel.bundle
+  git log --author=fokomaximejoel --oneline
+
+Toute modification de l'historique change ces empreintes.
+Consigner ce bloc hors du dépôt (courriel, GitBook, mémoire) pour
+qu'il serve de référence externe.
