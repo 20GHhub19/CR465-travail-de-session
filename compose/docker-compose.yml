@@ -51,7 +51,7 @@ services:
       - no-new-privileges:true
     labels:
       - traefik.enable=true
-      - traefik.http.routers.whoami.rule=Host(`whoami.cr465.lan`)
+      - traefik.http.routers.whoami.rule=Host(`whoami.cr465.test`)
       - traefik.http.routers.whoami.entrypoints=websecure
       - traefik.http.routers.whoami.tls=true         # cert auto-signe par defaut
       - traefik.http.services.whoami.loadbalancer.server.port=80

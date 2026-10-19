@@ -7,7 +7,7 @@ export MSYS_NO_PATHCONV=1
 set -euo pipefail
 
 VM_NAME="${1:-}"
-HOST="whoami.cr465.lan"
+HOST="whoami.cr465.test"
 
 while [ -z "$VM_NAME" ]; do
   read -r -p "Nom de la VM cible [vm-cr465-d] : " VM_NAME
