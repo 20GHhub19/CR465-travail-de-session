@@ -19,7 +19,8 @@ Travail de session (Polytechnique Montréal, CR465 Groupe D). Architecture multi
 | **SSO Moodle ↔ Keycloak** | ✅ **fonctionnel** — bouton Keycloak sur la page de connexion, session Moodle ouverte après authentification |
 | Moodle | ✅ opérationnel (Moodle 5.3, installé automatiquement, page de connexion FR) |
 | Portainer CE | ✅ opérationnel (accès `admin.<domaine>` restreint par IP) |
-| Applications métier restantes (Drupal, n8n) | 🔶 à déployer |
+| n8n + API Moodle | ✅ opérationnel — webhook → inscription vérifiée |
+| Drupal Commerce | 🔶 à déployer |
 | Scan d'images (Trivy) | 🔶 script fourni (`scripts/scan-images.sh`), rapports à produire |
 
 ## Pile technique

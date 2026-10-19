@@ -6,6 +6,53 @@
 
 ---
 
+## Sprint F — n8n et attribution d'accès (19 octobre 2026)
+
+### Ajouts
+
+| Élément | Détail |
+|---|---|
+| Service `n8n` | `n8nio/n8n:1.123.85`, base PostgreSQL dédiée, UI `flow.<domaine>` |
+| `compose/n8n/workflows/commande-moodle.template.json` | Workflow webhook → recherche utilisateur → `enrol_manual_enrol_users` |
+| `scripts/render-n8n-workflow.sh` | Injecte URL et jeton Moodle dans le workflow (secret hors dépôt) |
+| `scripts/configure-moodle-webservice.sh` | Service web REST, compte `svc-n8n`, rôle limité, jeton permanent |
+| `compose/moodle/webservice/configure-webservice.php` | Création du service, des fonctions et du rôle |
+| `compose/moodle/webservice/seed-course.php` | Cours de démonstration `CR465-DEMO` |
+| `docs/operations/integration-n8n.md` | Procédure, pièges, limites |
+
+### Modifications
+
+- `compose/docker-compose.yml` : service n8n, volume `n8n_data`, montage du workflow et de l'AC.
+- `.env.example` : `MOODLE_WS_TOKEN`, `MOODLE_COURSE_ID`.
+- `.gitignore` : workflow généré (contient le jeton).
+
+### Vérifications effectuées
+
+| Test | Résultat |
+|---|---|
+| API Moodle (site info) | 200, compte `svc-n8n`, 6 fonctions exposées |
+| Recherche utilisateur | `field=username` → utilisateur trouvé (id=3) |
+| Inscription directe | `enrol_manual_enrol_users` → `null` (succès) |
+| **Chaîne complète** | `POST https://flow.cr465.test/webhook/commande` → `{"status":"enrolled","email":"etudiant1@cr465.test"}` |
+| Vérification en base | ligne présente dans `mdl_user_enrolments`, cours `CR465-DEMO` |
+
+### Incidents rencontrés et corrigés
+
+1. `wsaccessusernologin` → plugin `auth_webservice` + compte en mode `webservice`.
+2. Recherche par email renvoyant `[]` → recherche par `username` + `moodle/user:viewalldetails`.
+3. `wsusercannotassign` → ligne dans `role_allow_assign` pour autoriser l'attribution du rôle student.
+4. n8n exécutait un **ancien workflow** (7 doublons actifs, même chemin de webhook) → purge des workflows avant import.
+5. Valeurs d'expressions préfixées par `=` → n8n les traitait comme des expressions, jeton vide → configuration en `POST` form-urlencoded avec valeurs littérales.
+
+### Reste à faire (Sprint G)
+
+- **Drupal Commerce** (boutique + paiement simulé) : seul maillon manquant du parcours.
+- Création automatique de l'utilisateur Moodle s'il n'existe pas (nœud conditionnel).
+- Signature HMAC du webhook et idempotence.
+- Suppression de `whoami`, GitBook, vidéo, document de synthèse.
+
+---
+
 ## Sprint E — SSO Moodle ↔ Keycloak fonctionnel (19 octobre 2026)
 
 ### Ajouts
