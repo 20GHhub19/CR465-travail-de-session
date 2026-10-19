@@ -16,6 +16,7 @@ Travail de session (Polytechnique Montréal, CR465 Groupe D). Architecture multi
 | socket-proxy | ✅ API Docker en lecture seule |
 | PostgreSQL | ✅ opérationnel — 4 bases + 4 utilisateurs dédiés |
 | Keycloak + realm `cr465` | ✅ opérationnel — clients `moodle` et `drupal`, rôles, OIDC vérifié |
+| **SSO Moodle ↔ Keycloak** | ✅ **fonctionnel** — bouton Keycloak sur la page de connexion, session Moodle ouverte après authentification |
 | Moodle | ✅ opérationnel (Moodle 5.3, installé automatiquement, page de connexion FR) |
 | Portainer CE | ✅ opérationnel (accès `admin.<domaine>` restreint par IP) |
 | Applications métier restantes (Drupal, n8n) | 🔶 à déployer |
@@ -63,7 +64,7 @@ cp compose/.env.example compose/.env   # puis remplir compose/.env
 | `compose/` | services et configurations Docker Compose |
 | `docs/architecture/` | schémas (architecture, segmentation, séquences, défense en profondeur) |
 | `docs/security/` | sécurité des images, durcissement, rapports de scan |
-| `docs/operations/` | ordre de déploiement, procédures et incidents |
+| `docs/operations/` | ordre de déploiement, procédure SSO, incidents |
 | `gitbook/` | documentation GitBook (livrable) |
 | `md/` | énoncé et grilles de référence (fournis) |
 | `scripts/` | lancement, déploiement, tests, scan d'images |

@@ -6,6 +6,61 @@
 
 ---
 
+## Sprint E — SSO Moodle ↔ Keycloak fonctionnel (19 octobre 2026)
+
+### Ajouts
+
+| Élément | Détail |
+|---|---|
+| `scripts/gen-certs.sh` | AC locale + certificat wildcard `*.cr465.test` (825 jours), SAN, extensions serveur |
+| `compose/traefik/dynamic/tls.yml` | Certificat par défaut de Traefik (fin du certificat auto-signé interne) |
+| `compose/moodle/php/99-cr465.ini` | `curl.cainfo` / `openssl.cafile` : Moodle fait confiance à l'AC du projet |
+| `scripts/configure-moodle-sso.sh` | Branche le fournisseur OIDC dans Moodle (idempotent) |
+| `compose/moodle/sso/configure-oidc.php` | Script Moodle : création/mise à jour du fournisseur, découverte des endpoints, activation du plugin |
+| `docs/operations/sso-moodle.md` | Procédure complète et justification des choix |
+
+### Modifications
+
+- `compose/docker-compose.yml` : provider fichier Traefik, montage des certificats, **alias DNS internes** (`auth`, `lms`, `shop`, `flow`, `admin`, `whoami`), montage de l'AC dans Moodle.
+- `compose/keycloak/import/realm-cr465.template.json` : attribut PKCE retiré du client `moodle`.
+- `scripts/deploy-stack.sh` : génère les certificats avant le déploiement.
+
+### Justification
+
+- **Certificat signé par une AC locale** : Moodle refuse les endpoints non HTTPS et valide le certificat ; le certificat auto-signé interne de Traefik ne pouvait pas être validé.
+- **Alias DNS réseau** : `*.cr465.test` n'existe pas dans un DNS public ; les alias Docker permettent la résolution interne sans toucher au `hosts` de la VM.
+- **PKCE retiré pour `moodle` uniquement** : le plugin `auth_oauth2` de Moodle n'envoie pas `code_challenge`. Le client reste confidentiel (secret + redirect URI strict + TLS vérifié). Le client `drupal` conserve PKCE.
+- **`curlsecurityblockedhosts` vidé** : écart assumé, compensé par la segmentation (Keycloak joignable seulement depuis le réseau `app`).
+
+### Vérifications effectuées
+
+| Test | Résultat |
+|---|---|
+| Résolution interne | `getent hosts auth.cr465.test` → IP de Traefik ✅ |
+| Confiance TLS | cURL de Moodle → `.well-known` : **OK, 6 586 octets** ✅ |
+| Découverte d'endpoints | 11 endpoints enregistrés (authorization, token, userinfo, jwks…) ✅ |
+| Plugin activé | `auth_oauth2` actif, fournisseur visible sur la page de connexion ✅ |
+| Bouton SSO | page `/login/index.php` contient `auth/oauth2/login.php` et « Keycloak » ✅ |
+| Redirection OAuth | **303** vers `auth.cr465.test/.../auth?client_id=moodle&redirect_uri=https://lms.cr465.test/admin/oauth2callback.php&scope=openid profile email` ✅ |
+| Formulaire Keycloak | **200**, page « Se connecter à CR465 - Plateforme de formation » ✅ |
+| **Connexion complète** | Authentification avec `etudiant1` → **200 sur `https://lms.cr465.test/my/`**, titre « Tableau de bord \| moodle » ✅ |
+
+### Incidents rencontrés et corrigés
+
+1. `image` NOT NULL dans `mdl_oauth2_issuer` → champ `image` fourni vide.
+2. Moodle ne résolvait pas `auth.cr465.test` → alias DNS sur Traefik.
+3. Moodle bloquait les adresses privées (SSRF) → `curlsecurityblockedhosts` vidé, documenté.
+4. Keycloak refusait le flux (`Missing parameter: code_challenge_method`) → PKCE retiré du client `moodle`.
+5. Chemin des scripts CLI Moodle (`admin/cli` et non `public/admin/cli`) → corrigé.
+
+### Reste à faire (Sprint F)
+
+- Drupal Commerce + paiement simulé.
+- n8n + workflow d'attribution d'accès.
+- Suppression de `whoami`, GitLab/GitBook, vidéo, synthèse.
+
+---
+
 ## Sprint D — Moodle, Portainer et sortie contrôlée (19 octobre 2026)
 
 ### Ajouts
