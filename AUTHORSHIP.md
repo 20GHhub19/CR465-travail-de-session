@@ -14,23 +14,33 @@
 | Fichiers distincts touchés | **77** |
 | Verticales | architecture, sécurité, base de données, identité, SSO, intégrations, livrables |
 
-## 2. Empreintes (état au 19 octobre 2026)
+## 2. Empreintes
 
-| Objet | Empreinte |
+Les valeurs courantes sont générées automatiquement dans **`authorship/empreintes.txt`** par
+`scripts/authorship-manifest.sh`, exécuté sur l'étiquette (et non sur la tête de branche, qui
+avance à chaque commit) :
+
+```bash
+./scripts/authorship-manifest.sh fokomaximejoel empreinte-maxime-v2
+```
+
+| Objet | Rôle |
 |---|---|
-| `HEAD` de la branche | `014c618cc78bbc9cf07579ee1e66327760bdecd6` |
-| Arbre Git (`tree`) | `d9f6a33e8dbd8fa633fe7f747a9f9c69bf9a8492` |
-| Manifeste des commits (SHA-256) | `88297167b971ea4ec0d91acc7bde88a945310834ed3215bf61b34a404a101def` |
-| Bundle Git `fokomaximejoel.bundle` (SHA-256) | `1d0bda443b4523cc21226704f34f0c4ceddefe4084d2bd77a88f8ac57fbfae79` |
-| Étiquette annotée | `empreinte-maxime-v1` |
+| Étiquette `empreinte-maxime-v2` | Point de référence signé (SSH) sur l'état décrit |
+| `authorship/fokomaximejoel-commits.txt` | Liste des commits de l'auteur avec SHA et date |
+| `authorship/empreintes.txt` | SHA-256 du manifeste et du bundle |
+| `authorship/fokomaximejoel.bundle` | Historique complet, **conservé hors du dépôt** |
 
-> **Point de référence** : l'étiquette annotée `empreinte-maxime-v1` pointe sur le commit
-> `014c618`. Les empreintes ci-dessus décrivent exactement cet état : c'est cette étiquette —
-> et non la tête de branche, qui avance à chaque commit — qu'un tiers doit vérifier.
+## 2 bis. Signatures
 
-> Le bundle (`authorship/fokomaximejoel.bundle`, 7,6 Mo) **n'est pas versionné** : il doit être
-> conservé hors du dépôt (courriel à soi-même, cloud personnel, clé USB). C'est cette copie qui
-> protège contre la réécriture de l'historique.
+Depuis la réécriture du 19 octobre 2026, **les 26 commits de l'auteur sont signés en SSH**
+(`gpg.format = ssh`, clé `~/.ssh/id_ed25519_cr465_signing`). Vérification locale :
+
+```bash
+git log --format='%h %G? %s' --author=fokomaximejoel   # G = signature valide
+```
+
+Les commits des autres membres n'ont pas été réécrits : leurs SHA sont inchangés.
 
 ## 3. Vérification par un tiers
 
