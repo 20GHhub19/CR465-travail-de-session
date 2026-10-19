@@ -1,0 +1,57 @@
+# ============================================================
+# Stack CR465 - Phase 3 : reseaux + Traefik + page de test
+# Reverse proxy Traefik + service de test whoami
+# Segmentation en 3 reseaux : edge (expose), app (applicatif), data (interne)
+#============================================================
+
+networks:
+  edge:            # seul reseau relie a l'exterieur (ports 80/443)
+  app:             # communication applicative (Traefik <-> services)
+  data:
+    internal: true # aucun acces exterieur : reserve aux bases de donnees (Phase 4+)
+
+services:
+  traefik:
+    image: traefik:v3.3
+    container_name: traefik
+    restart: unless-stopped
+      # Force une version d'API Docker acceptee par le daemon recent.
+      # Sans cela, Traefik negocie en 1.24 --> rejete --> aucun routeur cree.
+      # NB: compatibilite d'API Docker geree cote DEMON via le cloud-init
+      #     (/etc/systemd/system/docker.service.d/api-compat.conf -> DOCKER_MIN_API_VERSION=1.24)
+
+    command:
+      # Decouverte automatique des conteneurs via le socket Docker
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false   # rien expose sauf label explicite
+      # Points d'entree
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      # Redirection systematique HTTP -> HTTPS
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - edge
+      - app
+    security_opt:
+      - no-new-privileges:true                       # durcissement : pas d'escalade
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # socket en LECTURE SEULE
+
+  whoami:
+    image: traefik/whoami
+    container_name: whoami
+    restart: unless-stopped
+    networks:
+      - app                                          # jamais expose directement
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.whoami.rule=Host(`whoami.cr465.lan`)
+      - traefik.http.routers.whoami.entrypoints=websecure
+      - traefik.http.routers.whoami.tls=true         # cert auto-signe par defaut
+      - traefik.http.services.whoami.loadbalancer.server.port=80

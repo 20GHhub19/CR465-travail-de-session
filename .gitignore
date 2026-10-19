@@ -18,7 +18,9 @@ secrets/
 
 init-gitbook.sh
 save-history.sh
+ssh-keygen.sh
 # Détection des secrets avant chaque commit
 docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest detect --source=/repo -v
-md/operations/
 
+md/operations/
+scripts/vm-provision/
