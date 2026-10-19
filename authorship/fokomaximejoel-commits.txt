@@ -1,0 +1,29 @@
+# Empreinte d'auteur — fokomaximejoel
+# Branche : Projet-CR465-D-Maxime
+# Généré le : 2026-10-19T23:36:45Z (UTC)
+# Format  : <sha> <date> <sujet>
+#
+014c618cc78bbc9cf07579ee1e66327760bdecd6 2026-10-19T19:31:30-04:00 docs: identifie les contributions de fokomaximejoel dans GitBook et contributions
+212088c09823f15ee8052f67cf6b16b5c5a36be1 2026-10-19T19:28:50-04:00 docs: recapitalatif complet des modifications depuis le premier commit
+be785c456a78908d3e0f6857e6d15a45ce0bf4c0 2026-10-19T19:27:52-04:00 chore: retire le service de test whoami et aligne la documentation
+a24c1218bccbd442459e1052c7c11649b4e2b708 2026-10-19T19:13:12-04:00 docs: document de synthese (Word, 8 pages) et script video
+ff6b3c6314d9a35127eb3c19bfdfe05f9288e4fb 2026-10-19T18:56:06-04:00 docs(gitbook): remplissage des 11 pages du livrable
+28f62ad1ec53540f25f0914991651ae997929de7 2026-10-19T02:33:23-04:00 docs: drupal commerce et journal du sprint G
+1469b046dc60a263c9d59b4c453929d9b892198b 2026-10-19T02:33:23-04:00 feat(drupal): boutique Drupal Commerce et chaine d achat complete
+01f949f0bc74007f0175e0acd12d1525e027d6eb 2026-10-19T02:14:06-04:00 docs: integration n8n-Moodle et journal du sprint F
+ea639b01e9cd13bb2f9513d7bb192b571a0910b2 2026-10-19T02:14:06-04:00 feat(integration): n8n attribue les acces Moodle apres commande
+71e449eeb25f65a2821ea256dc7ef9aab0bcb356 2026-10-19T01:43:57-04:00 docs: SSO Moodle-Keycloak fonctionnel et journal du sprint E
+0231bceb693e0f2f45176d26eba2e5077a547bfa 2026-10-19T01:43:57-04:00 feat(sso): branche le fournisseur OIDC Keycloak dans Moodle
+1e926eee9a9c7b4b05bb2bbb1e8163c0632fda24 2026-10-19T01:43:57-04:00 feat(tls): certificat local de confiance et alias DNS internes
+eee45366ad86644703db9b04f7406479920b4e6a 2026-10-19T01:33:33-04:00 docs: Moodle et Portainer deployes, journal du sprint D
+2aa9c21fd469f04f92002ecc1290da012bdf5365 2026-10-19T01:33:33-04:00 feat(compose): ajoute Moodle, Portainer et un reseau egress controle
+d5de07e96ad743bb8765e4118a54d3f4abc202e3 2026-10-19T01:02:06-04:00 docs: deploiement, journal des modifications et schemas a jour
+03e83d7b21a2fcbb55f2f481e22653f4a51c3229 2026-10-19T01:02:06-04:00 feat(keycloak): realm cr465 avec clients OIDC Moodle et Drupal
+1f148f4c18dcc1d8d4225e8dc38487614af1e0c0 2026-10-19T01:02:06-04:00 feat(compose): ajoute PostgreSQL et Keycloak durcis
+0d140d6b8f92b02f13ba60d17bbbf065eaf15c47 2026-10-19T00:49:14-04:00 docs: met a jour README et schemas apres durcissement
+a3728bc3d2ec1ac1f474dd058c312cc8aeef8c27 2026-10-19T00:49:14-04:00 docs(security): politique images, durcissement, rapport de scan
+ed2722aaa99e4bff533f4e7e98bedd93d639faf7 2026-10-19T00:49:14-04:00 feat(scripts): scan local des images avec Trivy
+71a248027fd9ebcab47e7bd481ca0179f2424875 2026-10-19T00:49:14-04:00 feat(compose): durcit la stack conteneurisee
+2c4ca56eae07a6bb0c80372b68ab5fe572e71c7c 2026-10-19T00:38:39-04:00 docs(architecture): schemas consolides, guide de lecture et contributions
+8f387c3e2fe8ccadcb164887e11f199cd5119a27 2026-10-19T00:38:39-04:00 refactor(domaine): unifie tous les sous-domaines sur cr465.test
+a075c5b5d1fc59ef0e03ba2add54e53bfd6e1b9e 2026-10-19T00:38:39-04:00 chore: assainit le .gitignore (retrait commande shell, exclusions completes)

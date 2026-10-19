@@ -35,3 +35,6 @@ scripts/vm-provision/
 
 # Workflow n8n genere avec le jeton Moodle (voir scripts/render-n8n-workflow.sh)
 compose/n8n/workflows/commande-moodle.json
+
+# Empreinte d'auteur : bundle conserve hors du depot
+authorship/*.bundle

@@ -1,0 +1,51 @@
+# ============================================================
+# CODEOWNERS — propriété des fichiers
+#
+# GitHub demande automatiquement une revue au propriétaire du fichier
+# modifié. Le dernier motif correspondant l'emporte.
+#
+# Remplacer les pseudos par les comptes GitHub réels de chaque membre.
+# @fokomaximejoel est déjà renseigné (architecture, sécurité, intégrations).
+# ============================================================
+
+# --- Défaut : le mainteneur du dépôt ---------------------------------
+*                                   @20GHhub19
+
+# --- Architecture, schémas, documentation ----------------------------
+/docs/architecture/                 @fokomaximejoel
+/gitbook/                           @fokomaximejoel
+/CHANGELOG.md                       @fokomaximejoel
+/RECAP-modifications.md             @fokomaximejoel
+/AUTHORSHIP.md                      @fokomaximejoel
+
+# --- Socle VM as Code et reverse proxy -------------------------------
+/cloud-init/                        @GaiusHeumen
+/compose/traefik/                   @GaiusHeumen
+/scripts/launch-vm.sh               @GaiusHeumen
+/scripts/destroy-vm.sh              @GaiusHeumen
+/scripts/deploy-stack.sh            @GaiusHeumen
+
+# --- Données, identité, SSO ------------------------------------------
+/compose/postgres/                  @fokomaximejoel
+/compose/keycloak/                  @fokomaximejoel
+/scripts/render-keycloak-realm.sh   @fokomaximejoel
+/scripts/gen-certs.sh               @fokomaximejoel
+
+# --- Applications cœur ------------------------------------------------
+/compose/moodle/                    @fokomaximejoel
+/scripts/configure-moodle-sso.sh    @fokomaximejoel
+/scripts/configure-moodle-webservice.sh  @fokomaximejoel
+
+# --- Intégration et boutique ------------------------------------------
+/compose/n8n/                       @fokomaximejoel
+/compose/drupal/                    @fokomaximejoel
+/scripts/render-n8n-workflow.sh     @fokomaximejoel
+/scripts/configure-drupal.sh        @fokomaximejoel
+
+# --- Sécurité ---------------------------------------------------------
+/compose/docker-compose.yml         @fokomaximejoel @GaiusHeumen
+/docs/security/                     @fokomaximejoel
+/scripts/scan-images.sh             @fokomaximejoel
+
+# --- Observabilité ----------------------------------------------------
+/compose/observability/             @fokomaximejoel
