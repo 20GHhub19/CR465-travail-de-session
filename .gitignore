@@ -1,26 +1,31 @@
+# Secrets — ne JAMAIS commiter
 .env
 .env.*
 !.env.example
+secrets/
 *.key
 *.pem
-secrets/
+*.crt
+*.p12
+acme.json
 
 # Volumes locaux, dumps de base
-**/data/ 
+**/data/
 *.sql
 *.dump
 
-# Artefact OS /éditeur
+# Artefacts OS / éditeur
 .DS_Store
-*idea/
-.vscode/*
-:.vscode/extensions.json
+.idea/
+.vscode/
 
+# Fichiers générés
+*.log
+*.iso
 init-gitbook.sh
 save-history.sh
 ssh-keygen.sh
-# Détection des secrets avant chaque commit
-docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest detect --source=/repo -v
 
+# Dossiers internes non livrables
 md/operations/
 scripts/vm-provision/
