@@ -11,10 +11,10 @@ réussir sept fois de suite.
 flowchart TB
     MENACE["Menace : accès non autorisé · service compromis · fuite de données"]
 
-    C0["COUCHE 0 — BUILD (shift-left)<br/>images épinglées · scan Trivy — absent · aucun secret versionné"]
+    C0["COUCHE 0 — BUILD (shift-left)<br/>images épinglées · scan Trivy : script fourni · aucun secret versionné"]
     C1["COUCHE 1 — HÔTE (cloud-init)<br/>UFW 22/80/443 · SSH par clé, root off · fail2ban · unattended-upgrades"]
     C2["COUCHE 2 — PÉRIMÈTRE (edge)<br/>Traefik TLS ≥ 1.2 · exposedByDefault=false · HSTS · WAF bonus non déployé"]
-    C3["COUCHE 3 — APPLICATIF (app · internal)<br/>non-root · no-new-privileges · cap_drop ALL · limites · healthchecks"]
+    C3["COUCHE 3 — APPLICATIF (app · internal)<br/>non-root · no-new-privileges · cap_drop ALL · read_only · limites · healthcheck"]
     C4["COUCHE 4 — DONNÉES (data · internal)<br/>PostgreSQL jamais exposé · 1 base + 1 user par service · volumes nommés"]
     C5["COUCHE 5 — IDENTITÉ<br/>Keycloak OIDC · rôles etudiant / enseignant · MFA possible"]
     C6["COUCHE 6 — OBSERVABILITÉ<br/>Portainer CE · access log JSON · Loki / Grafana — bonus"]
@@ -53,10 +53,10 @@ flowchart TB
 
 | Couche | Contrôles | État vérifié |
 |---|---|---|
-| 0 — BUILD | Images épinglées, scan local, aucun secret versionné | Scan **absent** |
+| 0 — BUILD | Images épinglées, scan local, aucun secret versionné | **Script fourni**, rapport à produire |
 | 1 — HÔTE | UFW 22/80/443, SSH par clé, root off, fail2ban, unattended-upgrades, sysctl, logs Docker bornés | **Déployé** (cloud-init) |
 | 2 — PÉRIMÈTRE | Traefik TLS ≥ 1.2, `exposedByDefault=false`, HSTS, WAF bonus | **Partiel** (WAF absent) |
-| 3 — APPLICATIF | non-root, `no-new-privileges`, `cap_drop: ALL`, limites, healthchecks | **Partiel** (`cap_drop` et limites absents) |
+| 3 — APPLICATIF | non-root, `no-new-privileges`, `cap_drop: ALL`, `read_only`, limites, healthcheck | **Appliqué** dans le compose |
 | 4 — DONNÉES | PostgreSQL jamais exposé, 1 base + 1 user par service | Cible |
 | 5 — IDENTITÉ | Keycloak OIDC, rôles, MFA possible | Cible (non configuré) |
 | 6 — OBSERVABILITÉ | Portainer, access log JSON, Loki/Grafana | Cible (absent) |
@@ -64,5 +64,7 @@ flowchart TB
 ## Risque résiduel à documenter
 
 - L'utilisateur `adminops` appartient au groupe `docker` : sur l'hôte, cela équivaut à **root**.
-- Le socket Docker est aujourd'hui monté en direct dans Traefik : le mode `:ro` **n'empêche pas**
-  les écritures via l'API. Correctif : `docker-socket-proxy` en lecture seule.
+- Le socket Docker n'est **plus** monté dans Traefik : il passe par `docker-socket-proxy`
+  en lecture seule (`POST: 0`), sur un réseau `socket` isolé.
+- `whoami` n'a pas de healthcheck : image `scratch` sans binaire interne. Le healthcheck de
+  Traefik et `scripts/test-routing.sh` couvrent la vérification.

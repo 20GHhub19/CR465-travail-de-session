@@ -24,7 +24,7 @@ flowchart TB
 
     subgraph OPS["RÉSEAU OPS — internal: true<br/>administration & exploitation"]
         PORTAINER["Portainer CE<br/>accès via Traefik + allowlist IP"]
-        SOCKP["docker-socket-proxy<br/>API Docker en lecture seule<br/>— recommandé, à ajouter —"]
+        SOCKP["docker-socket-proxy v0.5.0<br/>API Docker en lecture seule<br/>POST = 0"]
     end
 
     subgraph DATA["RÉSEAU DATA — internal: true<br/>aucune route vers l'extérieur"]
@@ -109,8 +109,15 @@ flowchart TB
 4. Traefik → socket Docker brut (passage obligé par le socket-proxy, en lecture seule)
 5. Portainer hors de la liste d'IP autorisées
 
-## Décision à documenter
+## État d'implémentation (mis à jour)
 
-`app` est en `internal: true` : **n8n ne peut donc pas sortir sur Internet**. C'est acceptable ici
-(paiement simulé, tous les services sont locaux). Si un appel sortant devenait nécessaire, créer un
-réseau `egress` dédié à n8n et le justifier par écrit.
+| Élément | État |
+|---|---|
+| `app` en `internal: true` | ✅ appliqué dans `compose/docker-compose.yml` |
+| `data` en `internal: true` | ✅ appliqué |
+| Réseau `socket` + `docker-socket-proxy` (`POST: 0`) | ✅ appliqué |
+| Portainer restreint par IP | 🔶 à faire au déploiement de Portainer |
+
+**Conséquence à assumer** : `app` interne signifie que **n8n ne peut pas sortir sur Internet**.
+C'est acceptable ici (paiement simulé, tous les services sont locaux). Si un appel sortant devenait
+nécessaire, créer un réseau `egress` dédié à n8n et le justifier par écrit.
