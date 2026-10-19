@@ -8,7 +8,6 @@ Commande : `./scripts/scan-images.sh`. Rapports bruts : `docs/security/scans/`.
 | Image | Version | HIGH | CRITICAL | Rapport |
 |---|---:|---:|---:|---|
 | `traefik` | v3.7.15 | **0** | **0** | `scans/traefik_v3.7.15.txt` |
-| `traefik/whoami` | v1.12.0 | 15 | 0 | `scans/traefik_whoami_v1.12.0.txt` |
 | `tecnativa/docker-socket-proxy` | v0.5.0 | 6 | 0 | `scans/tecnativa_docker-socket-proxy_v0.5.0.txt` |
 
 ## Analyse
@@ -18,12 +17,12 @@ Commande : `./scripts/scan-images.sh`. Rapports bruts : `docs/security/scans/`.
 Image à jour, aucun correctif attendu. C'est l'image qui **traite le trafic exposé** : c'est
 donc le bon endroit pour exiger zéro vulnérabilité connue, et c'est le cas.
 
-### `traefik/whoami:v1.12.0` — 15 HIGH
+### Service de test `whoami` — retiré
 
-Vulnérabilités dans les bibliothèques Go compilées dans le binaire (`golang.org/x/net`,
-`net/http` interne). **Image de test uniquement**, jamais destinée à la production : elle
-disparaîtra du compose avant la remise finale.
-Décision : *risque accepté et documenté*, avec suppression du service à la remise.
+Le service `traefik/whoami` servait uniquement à valider le routage Traefik en début de projet.
+Son scan révélait **15 vulnérabilités HIGH** dans les bibliothèques Go compilées. Il a été
+**retiré de la stack avant la remise** : plus de surface d'attaque inutile, plus de service
+exposé sans rôle métier. Le test de routage cible désormais Moodle (`scripts/test-routing.sh`).
 
 ### `tecnativa/docker-socket-proxy:v0.5.0` — 6 HIGH
 

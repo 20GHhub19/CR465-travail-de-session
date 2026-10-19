@@ -6,6 +6,35 @@
 
 ---
 
+## Sprint H — Retrait du service de test (19 octobre 2026)
+
+### Modifications
+
+- `compose/docker-compose.yml` : suppression du service `whoami` et de son alias DNS. La stack
+  compte désormais **9 services**, tous métier ou d'infrastructure.
+- `scripts/test-routing.sh` : le test de routage cible **Moodle** (`lms.cr465.test`) au lieu du
+  service de test.
+- `docs/security/scans/traefik_whoami_v1.12.0.txt` : rapport supprimé.
+- Documentation alignée : README, GitBook (architecture, sécurité, limites, déploiement),
+  pages d'architecture, rapport de scan, script vidéo.
+
+### Justification
+
+Le service `traefik/whoami` n'avait plus de fonction : il servait à prouver le routage avant que
+les applications existent. Il était **exposé publiquement**, sa raison d'être est de divulguer
+des informations sur le conteneur et la requête, et son scan relevait **15 vulnérabilités HIGH**.
+Le conserver n'apportait aucun point et ajoutait une surface d'attaque inutile.
+
+### Vérifications
+
+| Test | Résultat |
+|---|---|
+| `docker compose config --services` | 9 services, aucun `whoami` |
+| `docker compose config` | valide |
+| Références résiduelles | aucune hors notes historiques |
+
+---
+
 ## Sprint G — Drupal Commerce et chaîne complète (19 octobre 2026)
 
 ### Ajouts

@@ -125,7 +125,6 @@ services:
           - shop.cr465.test
           - flow.cr465.test
           - admin.cr465.test
-          - whoami.cr465.test
       socket: {}
     healthcheck:
       test: ["CMD", "traefik", "healthcheck", "--ping"]
@@ -139,35 +138,7 @@ services:
           cpus: "0.50"
           memory: 256M
 
-  # ------------------------------------------------------------------
-  # whoami : service de TEST du routage (a retirer avant la remise finale)
-  # ------------------------------------------------------------------
-  whoami:
-    <<: *durcissement
-    image: traefik/whoami:v1.12.0   # version epinglee (plus de :latest)
-    container_name: cr465-whoami
-    user: "65534:65534"             # nobody
-    read_only: true
-    environment:
-      WHOAMI_PORT_NUMBER: "8080"    # port non privilegie -> compatible non-root
-    networks:
-      - app                         # jamais expose directement : passe par Traefik
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.whoami.rule=Host(`whoami.cr465.test`)
-      - traefik.http.routers.whoami.entrypoints=websecure
-      - traefik.http.routers.whoami.tls=true
-      - traefik.http.services.whoami.loadbalancer.server.port=8080
-    deploy:
-      resources:
-        limits:
-          cpus: "0.10"
-          memory: 32M
-    # Pas de healthcheck : l'image est "scratch" (aucun shell ni binaire HTTP
-    # disponible a l'interieur). Le healthcheck de Traefik couvre le proxy ;
-    # scripts/test-routing.sh couvre le routage vers whoami.
-
-  # ------------------------------------------------------------------
+ # ------------------------------------------------------------------
   # PostgreSQL : instance unique, une base + un utilisateur par service
   # Jamais expose : reseau data uniquement, aucun port publie.
   # ------------------------------------------------------------------

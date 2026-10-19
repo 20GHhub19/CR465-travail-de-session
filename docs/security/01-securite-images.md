@@ -7,12 +7,11 @@
 | Image | Version épinglée | Source | Justification |
 |---|---|---|---|
 | `traefik` | `v3.7.15` | Docker Official Image | Reverse proxy maintenu ; version de correctif figée (pas de `v3.3` flottant, pas de `latest`). v3.7 est la première ligne négociant correctement l'API Docker ≥ 1.40 |
-| `traefik/whoami` | `v1.12.0` | Éditeur Traefik | Service de test uniquement, image `scratch` (surface minimale) |
 | `tecnativa/docker-socket-proxy` | `v0.5.0` | Projet communautaire largement utilisé | Filtre l'API Docker en lecture seule : évite de monter le socket brut |
 
 **Règles appliquées**
 
-1. Aucune image en `latest` (l'ancienne configuration utilisait `traefik/whoami` sans tag = `latest`).
+1. Aucune image en `latest` (l'ancienne configuration utilisait une image de test sans tag = `latest`).
 2. Version **de correctif** plutôt que de ligne mineure : `v3.7.15` et non `v3.7`.
 3. Images officielles ou d'éditeur de confiance, pas d'image « random » non maintenue.
 

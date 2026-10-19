@@ -20,7 +20,6 @@
 | Certificat auto-signé | Pas de domaine public ; AC locale générée par script et distribuée aux conteneurs. |
 | Réseau `egress` ouvert | Limité à Moodle, n8n et Drupal (installation et webhooks). |
 | `curlsecurityblockedhosts` vidé dans Moodle | Protection SSRF désactivée ; compensée par la segmentation réseau. |
-| 15 vulnérabilités HIGH dans `whoami` | Service de test, à retirer avant la remise. |
 | Aucun WAF | Bonus OpenAppSec non engagé (+2 hors total). |
 
 ## Limites techniques

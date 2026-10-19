@@ -9,14 +9,13 @@
 | Image | Version épinglée | HIGH | CRITICAL |
 |---|---|---:|---:|
 | `traefik` | `v3.7.15` | 0 | 0 |
-| `traefik/whoami` | `v1.12.0` | 15 | 0 |
 | `tecnativa/docker-socket-proxy` | `v0.5.0` | 6 | 0 |
 
 Scan **local** avec Trivy (`./scripts/scan-images.sh`), aucun service cloud.
 Rapports bruts : `docs/security/scans/`. Analyse détaillée : `docs/security/03-rapport-scan.md`.
 
-> `whoami` est un service de **test** : il porte 15 vulnérabilités HIGH et sera retiré
-> avant la remise.
+> Un service de test (`whoami`) utilisé en début de projet portait 15 vulnérabilités HIGH :
+> il a été **retiré de la stack** avant la remise.
 
 ## Sécurité à l'exécution
 

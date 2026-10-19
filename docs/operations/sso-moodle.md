@@ -34,7 +34,7 @@ le déclare comme autorité de confiance via `compose/moodle/php/99-cr465.ini`
 Les noms `*.cr465.test` n'existent pas dans un DNS public.
 
 **Solution :** Traefik porte des **alias réseau** pour tous les noms publics
-(`auth`, `lms`, `shop`, `flow`, `admin`, `whoami`). Les conteneurs du réseau `app`
+(`auth`, `lms`, `shop`, `flow`, `admin`). Les conteneurs du réseau `app`
 résolvent donc ces noms vers Traefik, sans dépendre d'un DNS externe.
 
 ### 3. Moodle bloque les adresses privées (protection SSRF)

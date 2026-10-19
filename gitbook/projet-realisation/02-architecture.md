@@ -21,7 +21,6 @@
 | `n8n` | `n8nio/n8n:1.123.85` | Orchestration | app, data, egress |
 | `drupal` | `cr465/drupal:1.0.0` (dérivée) | Boutique Commerce | app, data, egress |
 | `portainer` | `portainer/portainer-ce:2.45.2` | Exploitation graphique | app, socket |
-| `whoami` | `traefik/whoami:v1.12.0` | **Service de test** du routage (à retirer) | app |
 
 ## Domaines
 
@@ -32,7 +31,6 @@
 | `auth.cr465.test` | Keycloak |
 | `flow.cr465.test` | n8n |
 | `admin.cr465.test` | Portainer (restreint par IP) |
-| `whoami.cr465.test` | service de test |
 
 ## Choix structurants
 

@@ -25,7 +25,7 @@ Travail de session (Polytechnique Montréal, CR465 Groupe D). Architecture multi
 
 ## Pile technique
 
-**Déployé** : Traefik · socket-proxy (RO + RW) · PostgreSQL · Keycloak · Moodle · Portainer CE · service de test `whoami`
+**Déployé** : Traefik · socket-proxy (RO + RW) · PostgreSQL · Keycloak · Moodle · Portainer CE · n8n · Drupal Commerce
 **Cible** : — (tous les services sont déployés)
 **Bonus (non engagés)** : Redis · Grafana/Loki · OpenAppSec (WAF, mode local)
 

@@ -11,8 +11,8 @@
 | `cap_drop: ALL` | bloc commun `x-durcissement` | Toutes les capacités Linux retirées par défaut |
 | `cap_add: NET_BIND_SERVICE` | `traefik` uniquement | Seule capacité nécessaire pour ouvrir les ports 80/443 |
 | `user: "1000:1000"` | `traefik` | Processus non-root |
-| `user: "65534:65534"` | `whoami` | Exécution en `nobody` |
-| `read_only: true` | `traefik`, `whoami`, `socket-proxy`, `postgres` | Système de fichiers du conteneur en lecture seule |
+| `user: "65534:65534"` | services applicatifs | Exécution en `nobody` |
+| `read_only: true` | `traefik`, `socket-proxy`, `postgres` | Système de fichiers du conteneur en lecture seule |
 | `cap_add` ciblés | `postgres` : `CHOWN`, `DAC_OVERRIDE`, `FOWNER`, `SETGID`, `SETUID` | Nécessaires à l'entrypoint PostgreSQL pour préparer le volume |
 | Écart assumé : `read_only` absent | `keycloak` | Au premier démarrage, Keycloak reconstruit sa configuration Quarkus dans `/opt/keycloak/lib` : le système de fichiers doit être inscriptible. Compensé par un utilisateur non-root et un volume dédié |
 | `tmpfs: /tmp` | `traefik` | Zone d'écriture temporaire, non persistante |
@@ -44,7 +44,6 @@ depuis Traefik est refusée.
 | `socket-proxy` garde un accès en lecture à l'API | Traefik en a besoin pour découvrir les conteneurs | Écriture désactivée (`POST: 0`), réseau `socket` isolé |
 | **`socket-proxy-admin` autorise l'écriture** | Portainer doit créer/arrêter des conteneurs : impossible en lecture seule | Instance séparée, réseau `socket` isolé, accès réservé à Portainer, UI restreinte par allowlist IP |
 | **Réseau `egress` ouvert** | Moodle télécharge ses dépendances à l'installation ; n8n doit joindre des webhooks | Réseau dédié rattaché à ces deux services seulement, tous les autres restent `internal: true` |
-| `whoami` n'a pas de healthcheck | Image `scratch` : aucun binaire interne pour tester | Healthcheck Traefik + `scripts/test-routing.sh` |
 | Certificat TLS auto-signé | Pas de nom de domaine public dans ce travail | Documenté ; remplaçable par Let's Encrypt en production |
 | Keycloak non `read_only` | Reconstruction Quarkus au premier démarrage | Utilisateur non-root, volume dédié, limites de ressources |
 

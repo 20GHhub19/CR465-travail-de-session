@@ -1,8 +1,8 @@
 # Schéma 1 — Architecture générale
 
-> **État au 19 octobre 2026.** Déployé et vérifié dans le dépôt : Traefik + un service de test
-> (`whoami`). Tout le reste est une **cible** : les éléments non encore déployés sont en
-> pointillé et signalés « non déployé ». Mettre ce schéma à jour à chaque ajout réel de service.
+> **État au 19 octobre 2026.** Les neuf services sont déployés et vérifiés (le service de test
+> `whoami` a été retiré). Les éléments encore non déployés — WAF, Redis, Loki — restent en
+> pointillé. Mettre ce schéma à jour à chaque ajout réel de service.
 
 **Objectif** : montrer le parcours métier complet (achat → automatisation → accès au cours),
 les points d'exposition et la place de chaque service.

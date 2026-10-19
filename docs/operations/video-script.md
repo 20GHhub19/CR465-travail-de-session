@@ -15,7 +15,7 @@
    - `https://admin.cr465.test/` (Portainer)
    - `https://flow.cr465.test/` (n8n)
 4. Zoom navigateur à 110 %, terminal en police 18.
-5. Vérifier que `whoami` n'apparaît pas dans la démonstration.
+5. Vérifier que la stack ne contient plus de service de test.
 6. Préparer deux comptes : `etudiant1@cr465.test` (déjà inscrit), `acheteur3@cr465.test` (nouveau).
 7. Fermer les notifications système.
 
@@ -170,7 +170,7 @@ docker exec cr465-postgres psql -U pgadmin -d moodle -c \
 
 - **Ne jamais dépasser 15:59** : viser 13 minutes. Si un bloc déborde, couper le bloc 7.
 - Ne pas montrer de mot de passe à l'écran (flouter ou taper hors champ).
-- Ne pas montrer `whoami` : ce service sera retiré.
+- Ne jamais montrer de mot de passe à l'écran.
 - Énoncer chaque commande avant de la lancer : la vidéo doit être compréhensible sans son.
 - Héberger sur **Microsoft 365 / Stream** de l'université et vérifier les droits d'accès.
 

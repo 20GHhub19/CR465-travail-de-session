@@ -33,7 +33,7 @@ Relevé le 19 octobre 2026 (`git shortlog -sne --all`) :
 ### Gaius — Socle VM as Code et reverse proxy
 - `cloud-init/user-data.yaml` : utilisateur `adminops` par clé SSH, durcissement SSH, UFW, fail2ban,
   mises à jour automatiques, sysctl, durcissement du démon Docker.
-- `compose/docker-compose.yml` : Traefik, réseaux `edge` / `app` / `data`, service de test `whoami`.
+- `compose/docker-compose.yml` : Traefik et segmentation réseau initiale (service de test depuis retiré).
 - `scripts/` : lancement de VM, déploiement, test de routage, montage du compose, destruction.
 - `docs/operations/incident-multipass-windows.md` : diagnostic et contournement d'incident.
 - `gitbook/` : squelette de la documentation.

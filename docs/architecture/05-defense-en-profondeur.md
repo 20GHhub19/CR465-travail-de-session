@@ -1,8 +1,8 @@
 # Schéma 5 — Défense en profondeur
 
-> **État au 19 octobre 2026.** Déployé et vérifié dans le dépôt : Traefik + un service de test
-> (`whoami`). Tout le reste est une **cible** : les éléments non encore déployés sont en
-> pointillé et signalés « non déployé ». Mettre ce schéma à jour à chaque ajout réel de service.
+> **État au 19 octobre 2026.** Les neuf services sont déployés et vérifiés (le service de test
+> `whoami` a été retiré). Les éléments encore non déployés — WAF, Redis, Loki — restent en
+> pointillé. Mettre ce schéma à jour à chaque ajout réel de service.
 
 **Objectif** : montrer que la sécurité est répartie en couches indépendantes — un attaquant doit
 réussir sept fois de suite.
@@ -66,5 +66,4 @@ flowchart TB
 - L'utilisateur `adminops` appartient au groupe `docker` : sur l'hôte, cela équivaut à **root**.
 - Le socket Docker n'est **plus** monté dans Traefik : il passe par `docker-socket-proxy`
   en lecture seule (`POST: 0`), sur un réseau `socket` isolé.
-- `whoami` n'a pas de healthcheck : image `scratch` sans binaire interne. Le healthcheck de
-  Traefik et `scripts/test-routing.sh` couvrent la vérification.
+- Le service de test a été retiré : le routage est vérifié par `scripts/test-routing.sh`, qui cible Moodle.

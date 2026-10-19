@@ -1,8 +1,8 @@
 # Schéma 3 — Séquence d'intégration Drupal Commerce → n8n → Moodle
 
-> **État au 19 octobre 2026.** Déployé et vérifié dans le dépôt : Traefik + un service de test
-> (`whoami`). Tout le reste est une **cible** : les éléments non encore déployés sont en
-> pointillé et signalés « non déployé ». Mettre ce schéma à jour à chaque ajout réel de service.
+> **État au 19 octobre 2026.** Les neuf services sont déployés et vérifiés (le service de test
+> `whoami` a été retiré). Les éléments encore non déployés — WAF, Redis, Loki — restent en
+> pointillé. Mettre ce schéma à jour à chaque ajout réel de service.
 
 **Objectif** : démontrer le parcours fonctionnel exigé, avec ses contrôles de sécurité.
 

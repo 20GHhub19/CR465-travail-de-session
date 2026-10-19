@@ -2,7 +2,7 @@
 
 ## Symptômes
 
-- `https://whoami.cr465.test` renvoie **404 page not found** (réponse de Traefik lui-même).
+- Le service de test (aujourd'hui retiré) renvoyait **404 page not found** — réponse de Traefik lui-même.
 - La redirection HTTP → HTTPS fonctionne (301), donc Traefik tourne.
 - Journaux Traefik :
   ```

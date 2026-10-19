@@ -40,7 +40,7 @@ Un `.gitignore` vérifie aussi `*.key`, `*.pem`, `*.crt`, `secrets/`.
 
 - `keycloak`, `moodle`, `n8n`, `drupal` attendent `postgres` **sain** (`condition: service_healthy`).
 - `traefik` attend `socket-proxy`.
-- Tous les services ont un **healthcheck** (sauf `whoami`, image `scratch` sans binaire interne).
+- Tous les services ont un **healthcheck**.
 
 ## Volumes persistants
 
