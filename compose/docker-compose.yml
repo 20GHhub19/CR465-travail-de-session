@@ -20,12 +20,21 @@ x-durcissement: &durcissement
 
 networks:
   edge:            # seul reseau relie a l'exterieur (ports 80/443 publies)
+    name: cr465_edge
   app:             # communication applicative (Traefik <-> services)
+    name: cr465_app
     internal: true # aucun acces Internet : les services ne peuvent pas sortir
   data:
+    name: cr465_data
     internal: true # reserve aux bases de donnees (phase 4+)
   socket:
+    name: cr465_socket
     internal: true # Traefik <-> socket-proxy uniquement
+  egress:
+    name: cr465_egress
+    # Sortie Internet CONTROLEE : seuls les services qui en ont besoin y sont
+    # rattaches (Moodle pour ses dependances, n8n pour ses webhooks sortants).
+    # Exception documentee dans docs/security/02-durcissement-execution.md.
 
 services:
   # ------------------------------------------------------------------
@@ -239,7 +248,136 @@ services:
       - traefik.http.routers.keycloak.entrypoints=websecure
       - traefik.http.routers.keycloak.tls=true
       - traefik.http.services.keycloak.loadbalancer.server.port=8080
+      - traefik.docker.network=cr465_app
+
+  # ------------------------------------------------------------------
+  # socket-proxy-admin : API Docker en LECTURE + ECRITURE pour Portainer
+  # (Portainer doit pouvoir creer/arreter des conteneurs).
+  # Isole sur le reseau socket, jamais expose publiquement.
+  # ------------------------------------------------------------------
+  socket-proxy-admin:
+    <<: *durcissement
+    image: tecnativa/docker-socket-proxy:v0.5.0
+    container_name: cr465-socket-proxy-admin
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /run
+    environment:
+      CONTAINERS: 1
+      SERVICES: 1
+      NETWORKS: 1
+      VOLUMES: 1
+      IMAGES: 1
+      EXEC: 1
+      INFO: 1
+      VERSION: 1
+      PING: 1
+      POST: 1          # ecriture autorisee : reservee a l'administration
+      LOG_LEVEL: warning
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - socket
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 64M
+
+  # ------------------------------------------------------------------
+  # Portainer CE : exploitation graphique (obligatoire dans l'enonce)
+  # Acces via Traefik uniquement, restreint aux reseaux d'administration.
+  # ------------------------------------------------------------------
+  portainer:
+    <<: *durcissement
+    image: portainer/portainer-ce:2.45.2
+    container_name: cr465-portainer
+    command:
+      - -H
+      - tcp://socket-proxy-admin:2375
+    volumes:
+      - portainer_data:/data
+    networks:
+      - app
+      - socket
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.portainer.rule=Host(`admin.${BASE_DOMAIN}`)
+      - traefik.http.routers.portainer.entrypoints=websecure
+      - traefik.http.routers.portainer.tls=true
+      - traefik.http.routers.portainer.middlewares=admin-allowlist@docker
+      - traefik.http.services.portainer.loadbalancer.server.port=9000
+      # middleware d'allowlist (IP autorisees pour les interfaces d'admin)
+      - traefik.http.middlewares.admin-allowlist.ipallowlist.sourcerange=${ADMIN_ALLOWLIST}
+
+  # ------------------------------------------------------------------
+  # Moodle : LMS principal (contenus consommes apres attribution d'acces)
+  # Installation automatisee au premier demarrage (image alpine-moodle).
+  # ------------------------------------------------------------------
+  moodle:
+    <<: *durcissement
+    image: erseco/alpine-moodle:v5.3.0
+    container_name: cr465-moodle
+    cap_add:
+      - SETUID
+      - SETGID
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+    environment:
+      SITE_URL: https://lms.${BASE_DOMAIN}
+      MOODLE_SITENAME: "CR465-Formation"   # pas d'espace : l'image passe la valeur en argument CLI
+      MOODLE_LANGUAGE: fr
+      MOODLE_USERNAME: ${MOODLE_ADMIN_USER}
+      MOODLE_PASSWORD: ${MOODLE_ADMIN_PASSWORD}
+      MOODLE_EMAIL: admin@${BASE_DOMAIN}
+      DB_TYPE: pgsql
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${MOODLE_DB_NAME}
+      DB_USER: ${MOODLE_DB_USER}
+      DB_PASS: ${MOODLE_DB_PASSWORD}
+      SSLPROXY: "true"        # TLS termine par Traefik
+      REVERSEPROXY: "false"
+    volumes:
+      - moodle_data:/var/www/moodledata
+      - moodle_html:/var/www/html
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app
+      - data
+      - egress          # necessaire pendant l'installation (dependances Composer)
+    healthcheck:
+      # Moodle repond 303 (redirection vers la page de connexion) : on accepte 2xx et 3xx
+      test: ["CMD-SHELL", "curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/login/index.php | grep -qE '^(200|303)'"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 180s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 1G
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.moodle.rule=Host(`lms.${BASE_DOMAIN}`)
+      - traefik.http.routers.moodle.entrypoints=websecure
+      - traefik.http.routers.moodle.tls=true
+      - traefik.http.services.moodle.loadbalancer.server.port=8080
+      - traefik.docker.network=cr465_app
 
 volumes:
   postgres_data:
   keycloak_data:
+  portainer_data:
+  moodle_data:
+  moodle_html:
