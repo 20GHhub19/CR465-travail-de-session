@@ -5,8 +5,9 @@
 
 ## Relevé Git (19 octobre 2026)
 
-| Auteur | Commits |
+| Auteur (Git) | Commits |
 |---|---:|
+| **fokomaximejoel** (Maxime) | **23** |
 | Gaius Heumen | 11 |
 | Citizen X | 6 |
 | notap-exe | 1 |
@@ -21,7 +22,7 @@ Branches de travail : `Projet-CR465-D`, `Projet-CR465-D-Anna`, `Projet-CR465-D-G
 | Membre | Verticale | Périmètre |
 |---|---|---|
 | **Gaius** | Socle VM as Code et reverse proxy | `cloud-init/`, Traefik, scripts de lancement, note d'incident Multipass |
-| **Maxime** | Architecture, documentation, coordination | schémas, GitBook, synthèse, unification du domaine, corrections de cohérence |
+| **Maxime** (`fokomaximejoel`) | Architecture, documentation, coordination | schémas, GitBook, synthèse, vidéo, base de données, identité, SSO, intégrations, durcissement |
 | **Anna** | Applications cœur | Drupal Commerce, Moodle, PostgreSQL |
 | **Membre 4** | Identité, intégrations, observabilité | Keycloak, n8n, Portainer |
 | **Membre 5** | Sécurité transversale | durcissement, scans Trivy, documentation sécurité |
@@ -34,11 +35,14 @@ Branches de travail : `Projet-CR465-D`, `Projet-CR465-D-Anna`, `Projet-CR465-D-G
 - `scripts/` : lancement de VM, déploiement, test de routage.
 - `docs/operations/incident-multipass-windows.md`.
 
-### Maxime — architecture et documentation
+### Maxime (`fokomaximejoel`) — architecture, sécurité et intégrations
 - `docs/architecture/01` à `05` : schémas consolidés (zones, flux interdits, webhook signé, SSO, 7 couches).
-- `docs/architecture/README.md` : guide de lecture.
-- `CHANGELOG.md` : journal détaillé des modifications.
-- Unification du domaine `cr465.test`, corrections `.gitignore` et contributions.
+- `compose/docker-compose.yml` : durcissement complet, PostgreSQL, Keycloak, Moodle, Portainer, n8n, Drupal.
+- `compose/keycloak/`, `compose/moodle/`, `compose/n8n/`, `compose/drupal/` : configurations et scripts.
+- `scripts/` : certificats, realm, SSO, service web Moodle, workflow n8n, installation Drupal, scan Trivy.
+- `docs/security/`, `docs/operations/` : documentation technique.
+- `gitbook/` (11 pages), `CR465-synthese-groupe-D.docx`, `docs/operations/video-script.md`.
+- `CHANGELOG.md`, `RECAP-modifications.md` : traçabilité des modifications.
 
 ### Anna — applications cœur
 - *(à compléter : Drupal Commerce, Moodle, PostgreSQL)*

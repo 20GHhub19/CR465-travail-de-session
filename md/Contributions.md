@@ -10,6 +10,7 @@ Relevé le 19 octobre 2026 (`git shortlog -sne --all`) :
 
 | Auteur (Git) | Commits | Branche principale |
 |---|---:|---|
+| **fokomaximejoel** (Maxime) | **23** | `Projet-CR465-D-Maxime` |
 | Gaius Heumen | 11 | `Projet-CR465-D-Gaius` |
 | Citizen X | 6 | (à préciser) |
 | notap-exe | 1 | (à préciser) |
@@ -38,7 +39,7 @@ Relevé le 19 octobre 2026 (`git shortlog -sne --all`) :
 - `docs/operations/incident-multipass-windows.md` : diagnostic et contournement d'incident.
 - `gitbook/` : squelette de la documentation.
 
-### Maxime — Architecture et documentation
+### Maxime (`fokomaximejoel`) — Architecture, sécurité et intégrations
 - `docs/architecture/01` à `05` : schémas consolidés (zones de confiance, flux interdits,
   authentification des webhooks, SSO OIDC, sept couches de défense).
 - `docs/architecture/README.md` : guide de lecture des cinq schémas.

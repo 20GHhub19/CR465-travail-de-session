@@ -8,6 +8,8 @@
 | Indicateur | Valeur |
 |---|---|
 | Commits dans l'historique | 41 |
+| Commits signés `fokomaximejoel` | **23** (77 fichiers) |
+| Commits des autres membres | 18 |
 | Fichiers modifiés depuis l'origine | 108 |
 | Lignes ajoutées / supprimées | +5 811 / −875 |
 | Fichiers ajoutés | 94 |
