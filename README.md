@@ -20,13 +20,13 @@ Travail de session (Polytechnique Montréal, CR465 Groupe D). Architecture multi
 | Moodle | ✅ opérationnel (Moodle 5.3, installé automatiquement, page de connexion FR) |
 | Portainer CE | ✅ opérationnel (accès `admin.<domaine>` restreint par IP) |
 | n8n + API Moodle | ✅ opérationnel — webhook → inscription vérifiée |
-| Drupal Commerce | 🔶 à déployer |
+| Drupal Commerce | ✅ opérationnel — boutique, produit, paiement simulé, webhook n8n |
 | Scan d'images (Trivy) | 🔶 script fourni (`scripts/scan-images.sh`), rapports à produire |
 
 ## Pile technique
 
 **Déployé** : Traefik · socket-proxy (RO + RW) · PostgreSQL · Keycloak · Moodle · Portainer CE · service de test `whoami`
-**Cible** : Drupal Commerce · n8n
+**Cible** : — (tous les services sont déployés)
 **Bonus (non engagés)** : Redis · Grafana/Loki · OpenAppSec (WAF, mode local)
 
 > Le durcissement gVisor est **étudié mais non activé** : le script d'installation existe

@@ -6,6 +6,60 @@
 
 ---
 
+## Sprint G — Drupal Commerce et chaîne complète (19 octobre 2026)
+
+### Ajouts
+
+| Élément | Détail |
+|---|---|
+| `compose/drupal/Dockerfile` | Image derivee : `bcmath`, `intl`, `drush`, **Drupal Commerce bake**, module custom |
+| `compose/drupal/entrypoint.sh` | Recree `settings.php` au premier demarrage (volume persistant) |
+| `compose/drupal/modules/cr465_notify/` | Module qui notifie n8n au passage d'une commande a `completed` (payload + HMAC) |
+| `compose/drupal/scripts/configure-commerce.php` | Boutique, passerelle de paiement simulee, produit |
+| `compose/drupal/scripts/simulate-purchase.php` | Simule un achat complet pour la demonstration |
+| `compose/drupal/php/99-cr465.ini` | Confiance TLS dans l'AC du projet (appels vers n8n) |
+| `scripts/configure-drupal.sh` | Installation/configuration reproductible |
+| `docs/operations/drupal-commerce.md` | Procedure, pieges, limites |
+
+### Modifications
+
+- `compose/docker-compose.yml` : service `drupal`, volumes `drupal_settings` et `drupal_files`, capacites ciblees (installation), montage de l'AC.
+- README : etat d'avancement mis a jour.
+
+### Justification
+
+- **Commerce bake dans l'image** : evite tout telechargement au demarrage et garantit un deploiement reproductible.
+- **Capacites ciblees sur Drupal** : `cap_drop: ALL` est conserve, seules les capacites necessaires a l'installation et a Apache sont ajoutees (documente).
+- **Module custom plutot que Rules** : une dependance de moins, un comportement explicite et testable.
+
+### Verifications effectuees
+
+| Test | Resultat |
+|---|---|
+| Boutique `https://shop.cr465.test/` | **200** |
+| Page produit | **200** — « Formation CR465 - Initiation aux conteneurs », 49.00 |
+| Panier | **200** |
+| Notification n8n | **HTTP 200** journalisee par Drupal |
+| **Chaine complete** | commande `completed` -> n8n -> **inscription Moodle creee** (`acheteur2@cr465.test`, cours `CR465-DEMO`) |
+
+### Incidents rencontres et corriges
+
+1. `ext-bcmath` manquant -> image derivee.
+2. Volumes de modules bloquant Composer -> modules bakes dans l'image.
+3. `cap_drop: ALL` sans `DAC_OVERRIDE` -> installation impossible -> capacites ciblees.
+4. `settings.php` perdu a chaque recreation -> volume + entrypoint.
+5. Devise `CAD` absente du referentiel -> produit en `USD` (documente).
+6. Certificat Traefik non reconnu par Drupal -> AC montee + `curl.cainfo`.
+7. `$entity->getOriginal()` inexistant -> `$entity->original`.
+
+### Reste a faire (Sprint H)
+
+- Verification de la signature HMAC cote n8n.
+- Creation automatique de l'utilisateur Moodle s'il n'existe pas.
+- Suppression de `whoami`, GitBook, video, document de synthese.
+
+---
+
 ## Sprint F — n8n et attribution d'accès (19 octobre 2026)
 
 ### Ajouts
