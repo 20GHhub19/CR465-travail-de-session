@@ -56,7 +56,6 @@
       ],
       "webOrigins": ["https://lms.cr465.test"],
       "attributes": {
-        "pkce.code.challenge.method": "S256",
         "post.logout.redirect.uris": "https://lms.cr465.test/*"
       },
       "defaultClientScopes": ["profile", "email", "roles", "web-origins"],

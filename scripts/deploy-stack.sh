@@ -19,6 +19,11 @@ echo "Compose : $COMPOSE"
 read -r -p "Deployer la stack ? (oui/non) : " REP
 [ "$REP" = "oui" ] || { echo "Annule."; exit 0; }
 
+# Certificats TLS locaux (AC + wildcard) : indispensables au SSO Moodle
+if [ -f scripts/gen-certs.sh ]; then
+  bash scripts/gen-certs.sh
+fi
+
 # Realm Keycloak : genere le fichier avec les secrets avant tout deploiement
 if [ -f scripts/render-keycloak-realm.sh ]; then
   bash scripts/render-keycloak-realm.sh
