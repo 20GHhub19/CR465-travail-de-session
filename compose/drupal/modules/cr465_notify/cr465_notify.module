@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * @file
+ * Notifie n8n lorsqu'une commande Drupal Commerce est payee.
+ *
+ * Parcours metier attendu : achat -> commande "completed" -> webhook n8n ->
+ * attribution de l'acces dans Moodle.
+ */
+
+use Drupal\commerce_order\Entity\OrderInterface;
+
+/**
+ * Reagit au passage d'une commande a l'etat "completed".
+ *
+ * On utilise hook_entity_update pour eviter une dependance a un module
+ * supplementaire (Rules) : des que la commande change d'etat, on verifie
+ * si elle vient d'etre payee, puis on appelle n8n.
+ */
+function cr465_notify_entity_update(\Drupal\Core\Entity\EntityInterface $entity): void {
+  if (!$entity instanceof OrderInterface) {
+    return;
+  }
+
+  // Etat courant et etat precedent.
+  $state = $entity->getState()->getId();
+  $original = $entity->original ?? NULL;
+  $original_state = ($original instanceof OrderInterface) ? $original->getState()->getId() : NULL;
+
+  // Ne notifier qu'une seule fois, au passage vers "completed".
+  if ($state !== 'completed' || $original_state === 'completed') {
+    return;
+  }
+
+  $config = \Drupal::config('cr465_notify.settings');
+  $url = $config->get('webhook_url');
+  if (empty($url)) {
+    \Drupal::logger('cr465_notify')->warning('Webhook n8n non configure : notification ignoree pour la commande @id.', [
+      '@id' => $entity->id(),
+    ]);
+    return;
+  }
+
+  // Adresse courriel du client (l'identite cote Moodle).
+  $email = '';
+  $customer = $entity->getCustomer();
+  if ($customer && $customer->getEmail()) {
+    $email = $customer->getEmail();
+  }
+  if (empty($email) && $entity->getEmail()) {
+    $email = $entity->getEmail();
+  }
+
+  $payload = [
+    'order_id' => $entity->getOrderNumber() ?: (string) $entity->id(),
+    'email' => $email,
+    'total' => (string) $entity->getTotalPrice()->getNumber(),
+    'currency' => $entity->getTotalPrice()->getCurrencyCode(),
+    'store' => $entity->getStoreId(),
+  ];
+
+  // Signature HMAC : n8n peut verifier que l'appel vient bien de Drupal.
+  $secret = $config->get('webhook_secret') ?: '';
+  $body = json_encode($payload);
+  $headers = ['Content-Type' => 'application/json'];
+  if ($secret) {
+    $headers['X-CR465-Signature'] = hash_hmac('sha256', $body, $secret);
+  }
+
+  try {
+    $response = \Drupal::httpClient()->post($url, [
+      'body' => $body,
+      'headers' => $headers,
+      'timeout' => 10,
+    ]);
+    \Drupal::logger('cr465_notify')->notice('Commande @id notifiee a n8n (HTTP @code).', [
+      '@id' => $entity->id(),
+      '@code' => $response->getStatusCode(),
+    ]);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('cr465_notify')->error('Echec de la notification n8n pour la commande @id : @msg', [
+      '@id' => $entity->id(),
+      '@msg' => $e->getMessage(),
+    ]);
+  }
+}

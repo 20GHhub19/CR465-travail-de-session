@@ -459,6 +459,67 @@ services:
       - traefik.http.services.n8n.loadbalancer.server.port=5678
       - traefik.docker.network=cr465_app
 
+  # ------------------------------------------------------------------
+  # Drupal Commerce : portail de vente (catalogue + paiement simule)
+  # ------------------------------------------------------------------
+  drupal:
+    <<: *durcissement
+    build:
+      context: ./drupal
+      dockerfile: Dockerfile
+    image: cr465/drupal:1.0.0     # derivee de drupal:10.6.19-php8.4-apache (+ bcmath, intl, drush)
+    container_name: cr465-drupal
+    cap_add:
+      # Apache demarre en root puis bascule vers www-data ; l'installation
+      # ecrit dans des repertoires appartenant a www-data.
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+      - NET_BIND_SERVICE
+    environment:
+      # connexion base (utilisee par le script d installation)
+      DRUPAL_DB_HOST: postgres
+      DRUPAL_DB_NAME: ${DRUPAL_DB_NAME}
+      DRUPAL_DB_USER: ${DRUPAL_DB_USER}
+      DRUPAL_DB_PASSWORD: ${DRUPAL_DB_PASSWORD}
+      DRUPAL_ADMIN_USER: ${DRUPAL_ADMIN_USER:-admin}
+      DRUPAL_ADMIN_PASSWORD: ${DRUPAL_ADMIN_PASSWORD:-changeme}
+      BASE_DOMAIN: ${BASE_DOMAIN}
+    volumes:
+      # l'image officielle utilise /opt/drupal (docroot = web/)
+      # modules et vendor sont bakes dans l'image ; settings.php et files persistent
+      - drupal_settings:/opt/drupal/web/sites/default
+      - drupal_files:/opt/drupal/web/sites/default/files
+      - ./traefik/certs/cr465-ca.crt:/certs/cr465-ca.crt:ro
+      - ./drupal/php/99-cr465.ini:/usr/local/etc/php/conf.d/99-cr465.ini:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app
+      - data
+      - egress
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf -o /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 1G
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.drupal.rule=Host(`shop.${BASE_DOMAIN}`)
+      - traefik.http.routers.drupal.entrypoints=websecure
+      - traefik.http.routers.drupal.tls=true
+      - traefik.http.services.drupal.loadbalancer.server.port=80
+      - traefik.docker.network=cr465_app
+
 volumes:
   postgres_data:
   keycloak_data:
@@ -466,3 +527,5 @@ volumes:
   moodle_data:
   moodle_html:
   n8n_data:
+  drupal_settings:
+  drupal_files:

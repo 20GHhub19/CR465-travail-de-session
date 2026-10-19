@@ -1,0 +1,7 @@
+name: 'CR465 Notification n8n'
+type: module
+description: "Notifie n8n lorsqu'une commande Drupal Commerce est payee, pour attribuer l'acces Moodle."
+package: CR465
+core_version_requirement: ^10 || ^11
+dependencies:
+  - commerce_order:commerce_order
