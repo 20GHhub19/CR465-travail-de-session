@@ -142,3 +142,104 @@ services:
     # Pas de healthcheck : l'image est "scratch" (aucun shell ni binaire HTTP
     # disponible a l'interieur). Le healthcheck de Traefik couvre le proxy ;
     # scripts/test-routing.sh couvre le routage vers whoami.
+
+  # ------------------------------------------------------------------
+  # PostgreSQL : instance unique, une base + un utilisateur par service
+  # Jamais expose : reseau data uniquement, aucun port publie.
+  # ------------------------------------------------------------------
+  postgres:
+    <<: *durcissement
+    image: postgres:17.11-alpine
+    container_name: cr465-postgres
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /run
+      - /var/run/postgresql
+    cap_add:
+      - CHOWN           # entrypoint : attribution du volume de donnees
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: postgres
+      DRUPAL_DB_PASSWORD: ${DRUPAL_DB_PASSWORD}
+      MOODLE_DB_PASSWORD: ${MOODLE_DB_PASSWORD}
+      KEYCLOAK_DB_PASSWORD: ${KC_DB_PASSWORD}
+      N8N_DB_PASSWORD: ${N8N_DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 1G
+
+  # ------------------------------------------------------------------
+  # Keycloak : fournisseur d'identite et SSO (OIDC)
+  # TLS termine par Traefik ; Keycloak recoit du HTTP sur le reseau app.
+  # ------------------------------------------------------------------
+  keycloak:
+    <<: *durcissement
+    image: quay.io/keycloak/keycloak:26.8.1
+    container_name: cr465-keycloak
+    command: ["start", "--import-realm"]
+    # Pas de read_only : au premier demarrage, Keycloak reconstruit sa
+    # configuration Quarkus dans /opt/keycloak/lib (ecriture necessaire).
+    # Ecart assume et documente dans docs/security/02-durcissement-execution.md.
+    tmpfs:
+      - /tmp
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/${KC_DB_NAME}
+      KC_DB_USERNAME: ${KC_DB_USER}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+      KC_HOSTNAME: https://auth.${BASE_DOMAIN}
+      KC_HTTP_ENABLED: "true"        # HTTP uniquement derriere Traefik
+      KC_PROXY_HEADERS: xforwarded   # fait confiance aux X-Forwarded-* de Traefik
+      KC_HEALTH_ENABLED: "true"
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_ADMIN}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD}
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ./keycloak/import:/opt/keycloak/data/import:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app
+      - data
+    healthcheck:
+      # l'image n'embarque pas curl : test HTTP minimal via /dev/tcp (bash)
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 && grep -q '200 OK' <&3"]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 1G
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.keycloak.rule=Host(`auth.${BASE_DOMAIN}`)
+      - traefik.http.routers.keycloak.entrypoints=websecure
+      - traefik.http.routers.keycloak.tls=true
+      - traefik.http.services.keycloak.loadbalancer.server.port=8080
+
+volumes:
+  postgres_data:
+  keycloak_data:
