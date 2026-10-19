@@ -9,6 +9,9 @@ secrets/
 *.p12
 acme.json
 
+# Realm Keycloak genere avec les secrets (voir scripts/render-keycloak-realm.sh)
+compose/keycloak/import/realm-cr465.json
+
 # Volumes locaux, dumps de base
 **/data/
 *.sql

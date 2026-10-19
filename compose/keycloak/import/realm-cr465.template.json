@@ -1,0 +1,91 @@
+{
+  "realm": "cr465",
+  "displayName": "CR465 - Plateforme de formation",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "registrationEmailAsUsername": false,
+  "resetPasswordAllowed": false,
+  "rememberMe": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "failureFactor": 5,
+  "waitIncrementSeconds": 60,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "passwordPolicy": "length(12) and notUsername and notEmail",
+  "internationalizationEnabled": true,
+  "supportedLocales": ["fr", "en"],
+  "defaultLocale": "fr",
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "roles": {
+    "realm": [
+      {
+        "name": "etudiant",
+        "description": "Apprenant : acces aux cours achetes dans Moodle"
+      },
+      {
+        "name": "enseignant",
+        "description": "Formateur : gestion des cours dans Moodle"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "moodle",
+      "name": "Moodle LMS",
+      "description": "Client OIDC utilise par Moodle (Authorization Code + PKCE)",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "__MOODLE_OIDC_CLIENT_SECRET__",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "https://lms.cr465.test",
+      "baseUrl": "https://lms.cr465.test",
+      "redirectUris": [
+        "https://lms.cr465.test/admin/oauth2callback.php",
+        "https://lms.cr465.test/*"
+      ],
+      "webOrigins": ["https://lms.cr465.test"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "https://lms.cr465.test/*"
+      },
+      "defaultClientScopes": ["profile", "email", "roles", "web-origins"],
+      "optionalClientScopes": ["offline_access"]
+    },
+    {
+      "clientId": "drupal",
+      "name": "Drupal Commerce (bonification)",
+      "description": "SSO Drupal - bonification, non requis pour la note de base",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "__DRUPAL_OIDC_CLIENT_SECRET__",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "https://shop.cr465.test",
+      "baseUrl": "https://shop.cr465.test",
+      "redirectUris": [
+        "https://shop.cr465.test/user/login/openid-connect/keycloak",
+        "https://shop.cr465.test/*"
+      ],
+      "webOrigins": ["https://shop.cr465.test"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": ["profile", "email", "roles", "web-origins"]
+    }
+  ]
+}

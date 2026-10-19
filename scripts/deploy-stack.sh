@@ -19,6 +19,11 @@ echo "Compose : $COMPOSE"
 read -r -p "Deployer la stack ? (oui/non) : " REP
 [ "$REP" = "oui" ] || { echo "Annule."; exit 0; }
 
+# Realm Keycloak : genere le fichier avec les secrets avant tout deploiement
+if [ -f scripts/render-keycloak-realm.sh ]; then
+  bash scripts/render-keycloak-realm.sh
+fi
+
 multipass exec "$VM_NAME" -- sudo docker compose -f "$COMPOSE" up -d
 
 echo "=== Conteneurs ==="
