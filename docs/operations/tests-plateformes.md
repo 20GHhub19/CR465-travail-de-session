@@ -8,7 +8,7 @@
 | Plateforme | Architecture | État | Validé par |
 |---|---|---|---|
 | macOS (Apple Silicon) | arm64 | ✅ testé (Docker local) | Maxime |
-| macOS (Apple Silicon) | arm64 | ⬜ VM as Code à valider (Multipass non installé) | — |
+| macOS 27 (Apple Silicon) | arm64 | ❌ Multipass bloqué (vmnet) — voir incident | Maxime |
 | macOS (Intel) | amd64 | ⬜ non testé | — |
 | Linux Ubuntu 24.04 | amd64 | ⬜ non testé | — |
 | Windows 11 + Hyper-V | amd64 | ⬜ non testé | — |
@@ -106,6 +106,42 @@ bash scripts/launch-vm.sh
 ```
 
 Sur Apple Silicon, Multipass lance une VM **arm64** : c'est le cas déjà validé.
+
+
+## Incident — Multipass inopérant sur macOS 27 (19 octobre 2026)
+
+### Symptôme
+
+`multipass launch` reste bloqué : état `Starting`/`Unknown`, aucune IPv4, `timed out waiting for
+response`. Le processus `qemu-system-aarch64` tourne mais consomme **0,0 % de CPU** et n'avance
+pas (0,02 s de temps CPU après 8 minutes).
+
+### Diagnostic
+
+Test direct du binaire QEMU fourni par Multipass :
+
+| Commande | CPU après 5 s | Conclusion |
+|---|---|---|
+| `qemu-system-aarch64 -accel hvf -M virt -m 256 …` | **98,7 %** (6,81 s) | l'accélération matérielle fonctionne |
+| idem + `-nic vmnet-shared,…` | **0,0 %** (0,06 s) | **le périphérique réseau bloque le démarrage** |
+
+La cause est donc **`vmnet-shared`** : Multipass utilise `vmnet.framework` pour le réseau partagé,
+et cette API ne fonctionne plus avec macOS 27 dans cette version de Multipass (1.16.4).
+
+### Contournements
+
+| Option | Effort | Fidélité |
+|---|---|---|
+| **Démonstration sur Windows 11 + Hyper-V** | 20 min | ✅ identique (même cloud-init) |
+| Démonstration sur Linux (Multipass/snap) | 30 min | ✅ identique |
+| Autre outil sur macOS (Lima en `vz`, UTM) | 1 h | ⚠️ ne réutilise pas les scripts du dépôt |
+| Attendre une version corrigée de Multipass | inconnu | — |
+
+### Ce qui reste vérifié malgré l'incident
+
+- `cloud-init schema --config-file cloud-init/user-data.yaml` → **Valid schema** (conteneur Ubuntu 24.04)
+- stack complète : 9 conteneurs sains, 5 domaines répondant 200/3xx
+- toutes les images existent en `amd64` et `arm64`
 
 ## Ce qu'il faut consigner
 
