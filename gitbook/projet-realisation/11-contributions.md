@@ -10,7 +10,7 @@
 | **fokomaximejoel** (Maxime) | **23** |
 | Gaius Heumen | 11 |
 | Citizen X | 6 |
-| notap-exe | 1 |
+| notap-exe (Anna) | 1 |
 | 20GHhub19 | 1 |
 | PolyMTL (licence initiale) | 2 |
 
@@ -23,7 +23,7 @@ Branches de travail : `Projet-CR465-D`, `Projet-CR465-D-Anna`, `Projet-CR465-D-G
 |---|---|---|
 | **Gaius** | Socle VM as Code et reverse proxy | `cloud-init/`, Traefik, scripts de lancement, note d'incident Multipass |
 | **Maxime** (`fokomaximejoel`) | Architecture, documentation, coordination | schémas, GitBook, synthèse, vidéo, base de données, identité, SSO, intégrations, durcissement |
-| **Anna** | Applications cœur | Drupal Commerce, Moodle, PostgreSQL |
+| **Anna** (`notap-exe`) | Applications cœur | Drupal Commerce, Moodle, PostgreSQL |
 | **Membre 4** | Identité, intégrations, observabilité | Keycloak, n8n, Portainer |
 | **Membre 5** | Sécurité transversale | durcissement, scans Trivy, documentation sécurité |
 

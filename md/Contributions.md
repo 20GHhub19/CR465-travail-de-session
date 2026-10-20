@@ -13,7 +13,7 @@ Relevé le 19 octobre 2026 (`git shortlog -sne --all`) :
 | **fokomaximejoel** (Maxime) | **23** | `Projet-CR465-D-Maxime` |
 | Gaius Heumen | 11 | `Projet-CR465-D-Gaius` |
 | Citizen X | 6 | (à préciser) |
-| notap-exe | 1 | (à préciser) |
+| notap-exe (Anna) | 1 | Projet-CR465-D-Anna |
 | 20GHhub19 | 1 | dépôt de référence |
 | PolyMTL (licence initiale) | 2 | — |
 
