@@ -75,7 +75,7 @@ grep -E "^(KC_ADMIN|MOODLE_ADMIN_USER|DRUPAL_ADMIN_USER)=" compose/.env
 docker inspect cr465-traefik --format 'user={{.Config.User}} capdrop={{.HostConfig.CapDrop}} readonly={{.HostConfig.ReadonlyRootfs}} nnp={{index .HostConfig.SecurityOpt 0}}'
 
 # 2. Aucun conteneur privilégié
-docker ps --format '{{.Names}}' | xargs -I{} docker inspect {} --format '{{.Name}} privileged={{.HostConfig.Privileged}}'
+docker ps --filter "name=cr465-" --format '{{.Names}}' | xargs -I{} docker inspect {} --format '{{.Name}} privileged={{.HostConfig.Privileged}}'
 
 # 3. Réseaux
 docker network ls | grep cr465
