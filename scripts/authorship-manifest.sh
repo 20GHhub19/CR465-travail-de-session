@@ -15,6 +15,15 @@ set -euo pipefail
 AUTHOR="${1:-fokomaximejoel}"
 BRANCH="${2:-$(git rev-parse --abbrev-ref HEAD)}"
 OUT="authorship"
+
+# shasum existe sur macOS, sha256sum sur Linux
+if command -v shasum >/dev/null 2>&1; then
+  sha256() { shasum -a 256 "$1" | awk '{print $1}'; }
+elif command -v sha256sum >/dev/null 2>&1; then
+  sha256() { sha256sum "$1" | awk '{print $1}'; }
+else
+  echo "ERREUR : ni shasum ni sha256sum disponibles." >&2; exit 1
+fi
 BUNDLE="$OUT/${AUTHOR}.bundle"
 MANIFEST="$OUT/${AUTHOR}-commits.txt"
 
@@ -41,8 +50,8 @@ FILES=$(git log "$BRANCH" --author="$AUTHOR" --name-only --format="" \
         | sort -u | grep -v '^$' | wc -l | tr -d ' ')
 HEAD_SHA=$(git rev-parse "$BRANCH")
 TREE_SHA=$(git rev-parse "$BRANCH^{tree}")
-MANIFEST_HASH=$(shasum -a 256 "$MANIFEST" | awk '{print $1}')
-BUNDLE_HASH=$(shasum -a 256 "$BUNDLE" | awk '{print $1}')
+MANIFEST_HASH=$(sha256 "$MANIFEST")
+BUNDLE_HASH=$(sha256 "$BUNDLE")
 
 cat <<EOF
 
@@ -62,7 +71,7 @@ Bundle Git      : $BUNDLE ($(du -h "$BUNDLE" | awk '{print $1}'))
 SHA-256         : $BUNDLE_HASH
 
 Vérification par un tiers :
-  shasum -a 256 -c <<< "$BUNDLE_HASH  $BUNDLE"
+  echo "$BUNDLE_HASH  $BUNDLE" | { command -v shasum >/dev/null && shasum -a 256 -c - || sha256sum -c -; }
   git bundle verify $BUNDLE
   git log --author=$AUTHOR --oneline
 

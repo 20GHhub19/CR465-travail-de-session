@@ -19,6 +19,13 @@ echo "Compose : $COMPOSE"
 read -r -p "Deployer la stack ? (oui/non) : " REP
 [ "$REP" = "oui" ] || { echo "Annule."; exit 0; }
 
+# Verifie que le compose est bien present dans la VM (sinon le montage manque)
+if ! multipass exec "$VM_NAME" -- test -f "$COMPOSE" 2>/dev/null; then
+  echo "ERREUR : $COMPOSE est introuvable dans la VM '$VM_NAME'."
+  echo "Lancez d'abord : bash scripts/mount-compose.sh $VM_NAME"
+  exit 1
+fi
+
 # Certificats TLS locaux (AC + wildcard) : indispensables au SSO Moodle
 if [ -f scripts/gen-certs.sh ]; then
   bash scripts/gen-certs.sh

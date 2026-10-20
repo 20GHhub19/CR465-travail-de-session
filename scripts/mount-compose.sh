@@ -23,22 +23,28 @@ if [ ! -f compose/docker-compose.yml ]; then
   exit 1
 fi
 
-# --- Activation automatique des montages (desactives par defaut sur Windows) ---
-CUR="$(multipass get local.privileged-mounts 2>/dev/null || echo '')"
-if [ "$CUR" != "true" ] && [ "$CUR" != "Yes" ]; then
-  echo "Montages desactives -> activation (local.privileged-mounts=true)…"
-  if ! multipass set local.privileged-mounts=true 2>/dev/null; then
-    echo
-    echo "!! Activation impossible depuis ce shell (droits insuffisants)."
-    echo "   Ouvrez PowerShell en ADMINISTRATEUR, lancez :"
-    echo "       multipass set local.privileged-mounts=true"
-    echo "   puis relancez ce script."
-    exit 1
-  fi
-  echo "Montages actives."
-fi
-
-SRC="$(pwd -W)/compose"            # chemin Windows du dossier source
+# --- Montages privilegies : reglage specifique a Windows (Hyper-V), ignore ailleurs ---
+case "$(uname -s)" in
+  MINGW*|MSYS*|CYGWIN*)
+    CUR="$(multipass get local.privileged-mounts 2>/dev/null || echo '')"
+    if [ "$CUR" != "true" ] && [ "$CUR" != "Yes" ]; then
+      echo "Montages desactives -> activation (local.privileged-mounts=true)…"
+      if ! multipass set local.privileged-mounts=true 2>/dev/null; then
+        echo
+        echo "!! Activation impossible depuis ce shell (droits insuffisants)."
+        echo "   Ouvrez PowerShell en ADMINISTRATEUR, lancez :"
+        echo "       multipass set local.privileged-mounts=true"
+        echo "   puis relancez ce script."
+        exit 1
+      fi
+      echo "Montages actives."
+    fi
+    SRC="$(pwd -W)/compose"        # Git Bash : chemin Windows du dossier source
+    ;;
+  *)
+    SRC="$(pwd)/compose"           # macOS / Linux
+    ;;
+esac
 echo "Source (hote) : $SRC"
 echo "Cible   (VM)  : $VM_NAME:$TARGET"
 read -r -p "Monter ce dossier ? (oui/non) : " REP
