@@ -42,20 +42,34 @@ Travail de session (Polytechnique Montréal, CR465 Groupe D). Architecture multi
 
 ```bash
 # 1. Lancer la VM (VM as Code)
-./scripts/launch-vm.sh                 # ou : multipass launch 24.04 --cloud-init cloud-init/user-data.yaml
+./scripts/launch-vm.sh                 # 4 vCPU / 8 Go / 60 Go, Ubuntu 24.04 + cloud-init
 
-# 2. Configurer les secrets (jamais commités)
+# 2. Exposer le dossier compose/ dans la VM  (OBLIGATOIRE)
+./scripts/mount-compose.sh             # monte ./compose sur /opt/cr465-groupe-d/compose
+
+# 3. Configurer les secrets (jamais commités)
 cp compose/.env.example compose/.env   # puis remplir compose/.env
 
-# 3. Déployer la stack
-./scripts/deploy-stack.sh              # ou : docker compose -f compose/docker-compose.yml up -d
+# 4. Déployer la stack (exécution DANS la VM)
+./scripts/deploy-stack.sh
 
-# 4. Vérifier le routage HTTPS
+# 5. Vérifier le routage HTTPS
 ./scripts/test-routing.sh
 
-# 5. Scanner les images (local, hors-ligne)
+# 6. Scanner les images (local, hors-ligne)
 ./scripts/scan-images.sh
 ```
+
+> Le déploiement tourne **dans la VM**, pas sur le poste de dev : `deploy-stack.sh` passe par
+> `multipass exec`. Docker n'est donc pas requis localement, sauf pour le scan Trivy.
+
+### Compatibilité des postes de dev
+
+| Système | Prérequis |
+|---|---|
+| macOS | Multipass, Git. Scripts exécutables directement. |
+| Linux | Multipass, Git, bash. Scripts exécutables directement. |
+| Windows | Multipass, Git **avec Git Bash** (ou WSL2). Lancer les scripts depuis Git Bash, pas depuis `cmd`. |
 
 ## Structure du dépôt
 

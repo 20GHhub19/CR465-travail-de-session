@@ -6,6 +6,31 @@
 
 ---
 
+## Sprint I — Reproductibilité sur un poste neuf (19 octobre 2026)
+
+### Modifications
+
+- `README.md` : le démarrage rapide omettait l'étape de montage du dossier `compose/` dans la VM.
+  Ajout de `scripts/mount-compose.sh` en étape 2, précision que le déploiement s'exécute **dans
+  la VM**, et tableau de compatibilité macOS / Linux / Windows (Git Bash ou WSL2).
+- `scripts/mount-compose.sh` : `pwd -W` n'existe que sous Git Bash — le script échouait sur
+  macOS et Linux. Détection par `uname -s`, chemin adapté par plateforme. L'activation de
+  `local.privileged-mounts` (spécifique à Windows/Hyper-V) est désormais conditionnelle.
+- `scripts/deploy-stack.sh` : contrôle préalable de la présence du compose dans la VM, avec
+  message explicite renvoyant vers `mount-compose.sh`.
+- `scripts/authorship-manifest.sh` : `shasum` est absent de Linux (`sha256sum` à la place).
+  Fonction `sha256()` qui choisit l'outil disponible.
+
+### Vérifications
+
+| Test | Résultat |
+|---|---|
+| `bash -n` sur les trois scripts | ✅ |
+| Exécution du manifeste après modification | ✅ empreintes régénérées |
+| Démarrage rapide relu étape par étape | ✅ chaque commande a son prérequis rempli |
+
+---
+
 ## Sprint H — Retrait du service de test (19 octobre 2026)
 
 ### Modifications
