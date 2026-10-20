@@ -10,7 +10,7 @@ Relevé le 19 octobre 2026 (`git shortlog -sne --all`) :
 
 | Auteur (Git) | Commits | Branche principale |
 |---|---:|---|
-| **fokomaximejoel** (Maxime) | **23** | `Projet-CR465-D-Maxime` |
+| **fokomaximejoel** (Maxime) | **35** | `Projet-CR465-D-Maxime` |
 | Gaius Heumen | 11 | `Projet-CR465-D-Gaius` |
 | Citizen X | 6 | (à préciser) |
 | notap-exe (Anna) | 1 | Projet-CR465-D-Anna |

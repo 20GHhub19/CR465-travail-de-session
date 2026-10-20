@@ -7,10 +7,10 @@
 
 | Auteur (Git) | Commits |
 |---|---:|
-| **fokomaximejoel** (Maxime) | **23** |
+| **fokomaximejoel** (Maxime) | **35** |
 | Gaius Heumen | 11 |
 | Citizen X | 6 |
-| notap-exe (Anna) | 1 |
+| notap-exe (Anna) | 2 |
 | 20GHhub19 | 1 |
 | PolyMTL (licence initiale) | 2 |
 
