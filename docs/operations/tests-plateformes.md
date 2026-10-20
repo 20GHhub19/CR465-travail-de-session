@@ -128,6 +128,34 @@ Test direct du binaire QEMU fourni par Multipass :
 La cause est donc **`vmnet-shared`** : Multipass utilise `vmnet.framework` pour le réseau partagé,
 et cette API ne fonctionne plus avec macOS 27 dans cette version de Multipass (1.16.4).
 
+
+### Tentative 2 — QEMU direct avec réseau utilisateur (19 octobre 2026)
+
+Objectif : contourner `vmnet` en démarrant l'image cloud Ubuntu arm64 directement avec QEMU,
+réseau utilisateur (slirp) et cloud-init par ISO `cidata`.
+
+| Étape | Résultat |
+|---|---|
+| Téléchargement de `noble-server-cloudimg-arm64.img` (588 Mo) | ✅ |
+| ISO `cidata` créée avec `hdiutil makehybrid` | ✅ |
+| Démarrage avec le QEMU fourni par Multipass | ❌ `network backend 'user' is not compiled into this binary` |
+| Installation de QEMU standard (Homebrew 11.1.2) | ✅ |
+| Démarrage avec QEMU standard | ⚠️ firmware UEFI atteint, mais **aucune entrée de démarrage** : la VM tombe sur le shell EFI (`Shell>`) |
+
+Le firmware détecte bien les deux disques (`BLK0`, `BLK1`) mais ne trouve pas de chargeur
+démarrable. L'image cloud arm64 d'Ubuntu n'expose pas d'entrée EFI exploitable dans cette
+configuration ; un démarrage par noyau direct serait nécessaire (extraction du noyau et de
+l'initrd depuis l'image ext4, impossible sans outils Linux supplémentaires).
+
+### Conclusion de l'incident
+
+Trois méthodes ont été tentées sur macOS 27 : Multipass (bloqué par `vmnet`), QEMU du paquet
+Multipass (pas de réseau utilisateur) et QEMU standard (pas d'entrée de démarrage EFI).
+**La démonstration VM as Code se fera sur Windows/Hyper-V ou sur Linux**, où le même fichier
+`cloud-init/user-data.yaml` s'exécute sans modification.
+
+Ce qui reste néanmoins vérifié sans VM : `cloud-init schema` (valide) et l'ensemble de la
+plateforme conteneurisée (voir `preuve-macos-sans-vm.md`).
 ### Contournements
 
 | Option | Effort | Fidélité |
