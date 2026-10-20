@@ -1,6 +1,6 @@
 # Identité et SSO
 
-![Séquence SSO](assets/04-sequence-sso.png)
+![Séquence SSO](../assets/04-sequence-sso.png)
 
 ## Keycloak
 

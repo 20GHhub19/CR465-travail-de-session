@@ -1,6 +1,6 @@
 # Mesures de sécurité (images + exécution)
 
-![Défense en profondeur](assets/05-defense-profondeur.png)
+![Défense en profondeur](../assets/05-defense-profondeur.png)
 
 *Sept couches indépendantes : un attaquant doit réussir sept fois de suite.*
 

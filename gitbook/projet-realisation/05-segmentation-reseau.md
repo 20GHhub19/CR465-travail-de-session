@@ -1,6 +1,6 @@
 # Segmentation réseau
 
-![Segmentation réseau](assets/02-segmentation-reseau.png)
+![Segmentation réseau](../assets/02-segmentation-reseau.png)
 
 ## Les cinq réseaux
 

@@ -1,6 +1,6 @@
 # Workflow n8n
 
-![Séquence d'intégration](assets/03-sequence-integration.png)
+![Séquence d'intégration](../assets/03-sequence-integration.png)
 
 ## Rôle
 

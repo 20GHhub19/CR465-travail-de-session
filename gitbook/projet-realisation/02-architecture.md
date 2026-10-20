@@ -4,7 +4,7 @@
 
 ## Vue d'ensemble
 
-![Architecture générale](assets/01-architecture-generale.png)
+![Architecture générale](../assets/01-architecture-generale.png)
 
 *Les schémas détaillés et leurs sources Mermaid sont dans `docs/architecture/`.*
 

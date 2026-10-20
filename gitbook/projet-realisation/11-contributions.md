@@ -7,7 +7,7 @@
 
 | Auteur (Git) | Commits |
 |---|---:|
-| **fokomaximejoel** (Maxime) | **35** |
+| **fokomaximejoel** (Maxime) | **45** |
 | Gaius Heumen | 11 |
 | Citizen X | 6 |
 | notap-exe (Anna) | 2 |
