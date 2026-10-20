@@ -6,6 +6,35 @@
 
 ---
 
+## Sprint J — Création automatique du compte Moodle (19 octobre 2026)
+
+### Problème
+
+Le workflow n8n cherchait l'apprenant par `username = email` mais **ne le créait pas**. Un nouvel
+acheteur recevait un webhook HTTP 200, l'exécution n8n était marquée `success`, et pourtant
+aucune inscription n'existait : le parcours ne fonctionnait que pour des comptes déjà provisionnés
+par un premier login SSO.
+
+### Modifications
+
+- `compose/n8n/workflows/commande-moodle.template.json` : ajout du nœud **Creer utilisateur
+  Moodle** (`core_user_create_users`, `auth=oauth2`, `onError: continueRegularOutput`) avant la
+  recherche ; l'inscription utilise désormais l'id issu de la recherche.
+- Correction de la référence `$json.body.email` → `$('Webhook commande').item.json.body.email`
+  dans le nœud de recherche (cassée par l'insertion du nœud précédent).
+- Documentation : `docs/operations/integration-n8n.md`, page 10 du GitBook (limite levée),
+  page 07 (provisioning), procédure de déploiement, script vidéo.
+
+### Vérifications réelles
+
+| Test | Résultat |
+|---|---|
+| Achat avec un email jamais vu | compte Moodle créé (`auth=oauth2`) **et** inscrit à `CR465-DEMO` |
+| Second achat, même email | toujours **1** inscription (idempotent) |
+| Webhook direct hors Drupal | `{"status":"enrolled","email":…}` |
+
+---
+
 ## Sprint I — Reproductibilité sur un poste neuf (19 octobre 2026)
 
 ### Modifications

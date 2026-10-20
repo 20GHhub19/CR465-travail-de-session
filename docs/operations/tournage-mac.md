@@ -145,7 +145,7 @@ docker exec cr465-postgres psql -U pgadmin -d moodle -c \
 
 ### 5f. Limites (30 s)
 
-Énoncer 3 limites assumées (paiement simulé, pas de SMTP, création de compte par premier login).
+Énoncer 3 limites assumées (paiement simulé, pas de SMTP, signature HMAC non vérifiée côté n8n).
 
 ---
 

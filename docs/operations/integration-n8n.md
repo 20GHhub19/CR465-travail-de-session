@@ -3,8 +3,22 @@
 ## Principe
 
 ```
-Drupal (achat) --POST webhook--> n8n --API REST--> Moodle (inscription au cours)
+Drupal (achat) --POST webhook--> n8n --API REST--> Moodle (creation du compte + inscription)
 ```
+
+Le workflow compte cinq nœuds :
+
+| Nœud | Rôle |
+|---|---|
+| Webhook commande | reçoit `{order_id, email, total, currency, store}` |
+| Creer utilisateur Moodle | `core_user_create_users` — le compte est créé s'il n'existe pas (`auth=oauth2`, `username = email`) |
+| Chercher utilisateur Moodle | `core_user_get_users_by_field` sur `username` = email |
+| Inscrire au cours | `enrol_manual_enrol_users` (rôle étudiant, cours `CR465-DEMO`) |
+| Reponse | renvoie `{"status":"enrolled","email":…}` |
+
+Le nœud de création porte `onError: continueRegularOutput` : si le compte existe déjà, Moodle
+renvoie une exception, le workflow continue et retrouve l'utilisateur à l'étape suivante.
+Le parcours est donc **idempotent** — un second achat pour le même email ne crée pas de doublon.
 
 En attendant le branchement de Drupal, le webhook se teste directement :
 
@@ -77,6 +91,19 @@ ajouter `moodle/user:viewalldetails` au rôle.
 | Compte dédié | `svc-n8n`, sans mot de passe, rôle limité |
 | Exposition | n8n accessible uniquement via Traefik (`flow.cr465.test`) |
 | Réseau | n8n sur `app` + `data` + `egress`, jamais exposé directement |
+
+## Piège supplémentaire — référence d'expression après un nœud HTTP
+
+Le nœud de recherche lisait `$json.body.email`. Tant qu'il suivait directement le webhook, cela
+fonctionnait ; après l'insertion du nœud de création, `$json` désigne la réponse de Moodle et
+`body.email` n'existe plus → Moodle répondait `invalid_parameter_exception` et **aucune
+inscription n'était créée**, sans que le workflow ne signale d'erreur.
+
+Règle : référencer explicitement le nœud source, jamais `$json` quand l'entrée a changé.
+
+```
+={{ $('Webhook commande').item.json.body.email }}
+```
 
 ## Limites actuelles
 

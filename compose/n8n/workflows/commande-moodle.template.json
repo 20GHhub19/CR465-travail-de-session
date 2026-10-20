@@ -44,7 +44,7 @@
             },
             {
               "name": "values[0]",
-              "value": "={{ $json.body.email }}"
+              "value": "={{ $('Webhook commande').item.json.body.email }}"
             }
           ]
         },
@@ -55,9 +55,68 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        220,
+        550,
         0
       ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "__MOODLE_URL__/webservice/rest/server.php",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "wstoken",
+              "value": "__MOODLE_WS_TOKEN__"
+            },
+            {
+              "name": "wsfunction",
+              "value": "core_user_create_users"
+            },
+            {
+              "name": "users[0][username]",
+              "value": "={{ $('Webhook commande').item.json.body.email }}"
+            },
+            {
+              "name": "users[0][email]",
+              "value": "={{ $('Webhook commande').item.json.body.email }}"
+            },
+            {
+              "name": "users[0][firstname]",
+              "value": "Apprenant"
+            },
+            {
+              "name": "users[0][lastname]",
+              "value": "CR465"
+            },
+            {
+              "name": "users[0][auth]",
+              "value": "oauth2"
+            },
+            {
+              "name": "users[0][password]",
+              "value": "Cr465!Demo2026"
+            },
+            {
+              "name": "moodlewsrestformat",
+              "value": "json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0005-4000-8000-000000000005",
+      "name": "Creer utilisateur Moodle",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        330,
+        0
+      ],
+      "onError": "continueRegularOutput",
+      "notes": "Cree le compte Moodle si absent. Si le compte existe deja, Moodle renvoie une exception : on continue, la recherche suivante retrouvera l'utilisateur."
     },
     {
       "parameters": {
@@ -85,7 +144,7 @@
             },
             {
               "name": "enrolments[0][userid]",
-              "value": "={{ $json.id }}"
+              "value": "={{ $json.id || $json[0].id }}"
             },
             {
               "name": "enrolments[0][courseid]",
@@ -100,27 +159,38 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        440,
+        770,
         0
       ]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { \"status\": \"enrolled\", \"email\": $('Webhook commande').item.json.body.email, \"result\": $json } }}"
+        "responseBody": "={{ { \"status\": \"enrolled\", \"email\": $('Webhook commande').item.json.body.email, \"resultat\": $json } }}"
       },
       "id": "a1b2c3d4-0004-4000-8000-000000000004",
       "name": "Reponse",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        660,
+        990,
         0
       ]
     }
   ],
   "connections": {
     "Webhook commande": {
+      "main": [
+        [
+          {
+            "node": "Creer utilisateur Moodle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creer utilisateur Moodle": {
       "main": [
         [
           {
@@ -158,5 +228,6 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "tags": []
+  "tags": [],
+  "id": "GlQUYya17Nb8YqT1"
 }

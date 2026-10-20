@@ -72,6 +72,6 @@ docker compose -f compose/docker-compose.yml up -d
 ## Limites connues
 
 - Le realm importé n'inclut **aucun utilisateur** : les comptes sont créés par le parcours
-  d'achat (n8n) ou par le premier login SSO. Ne jamais committer de mot de passe utilisateur.
+  d'achat (n8n crée le compte puis l'inscrit) ou par le premier login SSO. Ne jamais committer de mot de passe utilisateur.
 - Keycloak reconstruit sa configuration Quarkus au premier démarrage : le conteneur
   tourne donc **sans `read_only`** (écart assumé, voir `docs/security/02-durcissement-execution.md`).

@@ -158,8 +158,7 @@ docker exec cr465-postgres psql -U pgadmin -d moodle -c \
 
 **À dire** :
 > « Ce que nous assumons : le paiement est simulé, il n'y a pas de serveur mail, et la
-> création automatique du compte Moodle reste à faire — aujourd'hui c'est le premier login SSO
-> qui crée la fiche. La signature du webhook est envoyée mais pas encore vérifiée côté n8n.
+> signature du webhook est envoyée mais pas encore vérifiée côté n8n.
 > Enfin, le service de test sera retiré avant la remise.
 > Ce que nous retenons : une plateforme simple, reproductible, où chaque choix est justifié,
 > et dont les limites sont écrites noir sur blanc. Merci. »

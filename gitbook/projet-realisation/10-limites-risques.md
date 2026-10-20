@@ -7,7 +7,7 @@
 | Paiement **simulé** | Passerelle `example_onsite` de Drupal Commerce ; aucun encaissement réel. Autorisé par l'énoncé. |
 | Devise **USD** | Le référentiel de devises de cette installation ne contient que l'USD ; le produit est donc en USD et non en CAD. |
 | Pas de SMTP | Aucun serveur de mail dans la stack : Drupal journalise un échec d'envoi, sans impact sur le parcours. |
-| Création de compte Moodle | n8n n'inscrit que des utilisateurs **déjà connus** de Moodle (provisionnés par le premier login SSO). La création automatique par n8n reste à ajouter. |
+| ~~Création de compte Moodle~~ | **Résolu** : n8n crée le compte (`core_user_create_users`, `auth=oauth2`) lorsqu'il est absent, puis l'inscrit. Le parcours fonctionne avec un courriel jamais vu. |
 | Signature du webhook | Drupal envoie un HMAC (`X-CR465-Signature`) mais n8n ne le **vérifie pas encore**. |
 | Single logout | La déconnexion Moodle ne ferme pas la session Keycloak. |
 

@@ -38,7 +38,7 @@ L'utilisateur est connecté à Moodle **sans aucun mot de passe Moodle**.
 |---|---|
 | Flow | Authorization Code (PKCE retiré : le plugin core de Moodle ne l'implémente pas) |
 | Validation du jeton | signature JWKS, `iss`, `aud`, `exp` |
-| Provisioning | Moodle crée la fiche au premier login (`username = email`), aucun mot de passe stocké |
+| Provisioning | La fiche est créée par n8n à l'achat (`username = email`), ou au premier login SSO si l'utilisateur arrive directement. Aucun mot de passe stocké. |
 | Déconnexion | session Moodle fermée ; single logout non configuré (limite) |
 
 ## Difficultés résolues
