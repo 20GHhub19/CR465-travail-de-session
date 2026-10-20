@@ -107,7 +107,7 @@ docker logs cr465-drupal --tail 5 | grep cr465_notify
 > à n8n. n8n retrouve l'apprenant dans Moodle, puis l'inscrit au cours via l'API REST, avec un
 > compte de service qui n'a que les droits d'inscription — aucun accès administrateur. »
 
-**Montrer** dans n8n : les trois nœuds et l'exécution verte.
+**Montrer** dans n8n : les cinq nœuds (webhook, création du compte, recherche, inscription, réponse) et l'exécution verte.
 
 ### 5c. Résultat dans Moodle (7:30 → 8:15)
 **À l'écran** : `https://lms.cr465.test/` → connexion → cours.
