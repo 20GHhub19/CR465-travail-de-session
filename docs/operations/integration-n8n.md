@@ -92,6 +92,21 @@ ajouter `moodle/user:viewalldetails` au rôle.
 | Exposition | n8n accessible uniquement via Traefik (`flow.cr465.test`) |
 | Réseau | n8n sur `app` + `data` + `egress`, jamais exposé directement |
 
+## Vérification de la signature HMAC
+
+Drupal signe le corps brut avec `DRUPAL_WEBHOOK_SECRET` et l'envoie dans `X-CR465-Signature`.
+Le premier nœud du workflow est un **Code node** (`require('crypto')`, autorisé par
+`NODE_FUNCTION_ALLOW_BUILTIN=crypto`) qui recalcule le HMAC-SHA256 et compare :
+
+| Requête | Réponse |
+|---|---|
+| sans en-tête | **401** `{"status":"rejected","reason":"signature HMAC invalide ou absente"}` |
+| signature erronée | **401** idem |
+| signature valide | 200 `{"status":"enrolled",…}` |
+
+Le webhook doit exposer le **corps brut** (`options.rawBody = true`) : recalculer le HMAC sur un
+JSON re-sérialisé ne donne pas la même empreinte.
+
 ## Piège supplémentaire — référence d'expression après un nœud HTTP
 
 Le nœud de recherche lisait `$json.body.email`. Tant qu'il suivait directement le webhook, cela

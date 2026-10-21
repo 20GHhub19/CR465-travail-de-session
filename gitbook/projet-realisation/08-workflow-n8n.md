@@ -14,6 +14,7 @@ sous forme de JSON.
 Drupal : commande → état « completed »
    │  webhook POST https://flow.cr465.test/webhook/commande
    │  {order_id, email, total, currency} + en-tête X-CR465-Signature (HMAC)
+   │  → n8n recalcule le HMAC ; signature absente ou fausse = 401
    ▼
 n8n : « Webhook commande »
    │

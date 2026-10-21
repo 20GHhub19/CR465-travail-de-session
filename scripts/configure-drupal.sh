@@ -74,6 +74,13 @@ echo ">> Webhook n8n"
 docker exec -w /opt/drupal "$CONTAINER" "$DRUSH" config:set cr465_notify.settings \
   webhook_url "https://flow.${BASE_DOMAIN}/webhook/commande" -y >/dev/null
 
+# Secret HMAC : n8n rejette toute requete non signee (401)
+if [ -n "${DRUPAL_WEBHOOK_SECRET:-}" ]; then
+  docker exec -w /opt/drupal "$CONTAINER" "$DRUSH" config:set cr465_notify.settings \
+    webhook_secret "${DRUPAL_WEBHOOK_SECRET}" -y >/dev/null
+  echo "   secret HMAC configure"
+fi
+
 docker exec -w /opt/drupal "$CONTAINER" "$DRUSH" cr >/dev/null
 echo "Drupal Commerce configure."
 echo "Boutique : https://shop.${BASE_DOMAIN}/"

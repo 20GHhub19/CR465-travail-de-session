@@ -6,6 +6,33 @@
 
 ---
 
+## Sprint K — Signature HMAC vérifiée et `whoami` sous profil (19 octobre 2026)
+
+### Modifications
+
+- `compose/n8n/workflows/commande-moodle.template.json` : ajout de deux nœuds —
+  **Verifier signature HMAC** (Code node, `crypto`) et **Signature valide ?** (IF) — plus un
+  nœud de réponse **401**. Le webhook expose désormais le corps brut (`options.rawBody`).
+- `compose/docker-compose.yml` : `NODE_FUNCTION_ALLOW_BUILTIN=crypto` sur n8n ; service
+  `whoami` réintroduit **sous `profiles: ["test"]`**, sans label Traefik, sur le réseau `app`.
+- `compose/.env` / `.env.example` : `DRUPAL_WEBHOOK_SECRET`.
+- `scripts/configure-drupal.sh` : configure le secret côté Drupal.
+- `scripts/render-n8n-workflow.sh` : injecte `__WEBHOOK_SECRET__`.
+- `docs/architecture/05-defense-en-profondeur.md` : alignement sur la numérotation d'équipe
+  (couches 0 à 6) et état réel de chaque couche.
+
+### Vérifications réelles
+
+| Test | Résultat |
+|---|---|
+| Webhook sans signature | **401** `{"status":"rejected","reason":"signature HMAC invalide ou absente"}` |
+| Webhook avec signature erronée | **401** |
+| Achat Drupal (signature valide) | compte Moodle créé **et** inscrit à `CR465-DEMO` |
+| `docker compose config --services` | `whoami` **absent** par défaut, présent avec `--profile test` |
+| Labels Traefik de `whoami` | aucun |
+
+---
+
 ## Sprint J — Création automatique du compte Moodle (19 octobre 2026)
 
 ### Problème

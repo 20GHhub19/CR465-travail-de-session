@@ -26,10 +26,12 @@ set +a
 : "${MOODLE_WS_TOKEN:?MOODLE_WS_TOKEN manquant (lancer scripts/configure-moodle-webservice.sh)}"
 : "${BASE_DOMAIN:?BASE_DOMAIN manquant}"
 COURSE_ID="${MOODLE_COURSE_ID:-2}"
+: "${DRUPAL_WEBHOOK_SECRET:?DRUPAL_WEBHOOK_SECRET manquant (signature HMAC du webhook)}"
 
 sed -e "s|__MOODLE_URL__|https://lms.${BASE_DOMAIN}|g" \
     -e "s|__MOODLE_COURSE_ID__|${COURSE_ID}|g" \
     -e "s|__MOODLE_WS_TOKEN__|${MOODLE_WS_TOKEN}|g" \
+    -e "s|__WEBHOOK_SECRET__|${DRUPAL_WEBHOOK_SECRET}|g" \
     "$TPL" > "$OUT"
 chmod 600 "$OUT"
 

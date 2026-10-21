@@ -8,7 +8,7 @@
 | Devise **USD** | Le référentiel de devises de cette installation ne contient que l'USD ; le produit est donc en USD et non en CAD. |
 | Pas de SMTP | Aucun serveur de mail dans la stack : Drupal journalise un échec d'envoi, sans impact sur le parcours. |
 | ~~Création de compte Moodle~~ | **Résolu** : n8n crée le compte (`core_user_create_users`, `auth=oauth2`) lorsqu'il est absent, puis l'inscrit. Le parcours fonctionne avec un courriel jamais vu. |
-| Signature du webhook | Drupal envoie un HMAC (`X-CR465-Signature`) mais n8n ne le **vérifie pas encore**. |
+| ~~Signature du webhook~~ | **Résolu** : n8n recalcule le HMAC-SHA256 et rejette en **401** toute requête non signée ou mal signée. |
 | Single logout | La déconnexion Moodle ne ferme pas la session Keycloak. |
 
 ## Risques résiduels assumés
@@ -31,7 +31,7 @@
 
 ## Améliorations prioritaires
 
-1. Vérifier la signature HMAC dans n8n et rendre le workflow **idempotent**.
+1. Ajouter un **retry ×3 avec backoff** côté Drupal lorsque n8n est indisponible.
 2. Créer automatiquement l'utilisateur Moodle s'il n'existe pas (`core_user_create_users`).
 3. Déployer Loki + Grafana et exporter les journaux Traefik.
 4. Retirer `whoami` et verrouiller les versions par digest (`@sha256:`).

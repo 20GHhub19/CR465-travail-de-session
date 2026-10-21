@@ -3,10 +3,76 @@
   "nodes": [
     {
       "parameters": {
+        "jsCode": "// Verifie la signature HMAC-SHA256 du webhook (X-CR465-Signature).\n// Drupal signe le corps brut avec le secret partage ; n8n recalcule et compare.\nconst crypto = require('crypto');\nconst secret = '__WEBHOOK_SECRET__';\n\nconst wh = $('Webhook commande').item.json;\nconst raw = typeof wh.body === 'string' ? wh.body : JSON.stringify(wh.body);\nconst received = String(wh.headers['x-cr465-signature'] || '').toLowerCase();\nconst expected = crypto.createHmac('sha256', secret).update(raw).digest('hex');\n\nlet corps = {};\ntry { corps = typeof wh.body === 'string' ? JSON.parse(wh.body) : wh.body; } catch (e) {}\n\nconst valid = received.length > 0 && received === expected;\nreturn [{ json: { valid, email: corps.email || null, order_id: corps.order_id || null } }];"
+      },
+      "id": "a1b2c3d4-0006-4000-8000-000000000006",
+      "name": "Verifier signature HMAC",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-signature",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0007-4000-8000-000000000007",
+      "name": "Signature valide ?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        440,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"rejected\", \"reason\": \"signature HMAC invalide ou absente\" } }}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "a1b2c3d4-0008-4000-8000-000000000008",
+      "name": "Reponse refus 401",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        220
+      ]
+    },
+    {
+      "parameters": {
         "httpMethod": "POST",
         "path": "commande",
         "responseMode": "responseNode",
-        "options": {}
+        "options": {
+          "rawBody": true
+        }
       },
       "id": "a1b2c3d4-0001-4000-8000-000000000001",
       "name": "Webhook commande",
@@ -14,50 +80,9 @@
       "typeVersion": 2,
       "position": [
         0,
-        0
+        60
       ],
       "webhookId": "cr465-commande"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "__MOODLE_URL__/webservice/rest/server.php",
-        "sendBody": true,
-        "contentType": "form-urlencoded",
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "wstoken",
-              "value": "__MOODLE_WS_TOKEN__"
-            },
-            {
-              "name": "wsfunction",
-              "value": "core_user_get_users_by_field"
-            },
-            {
-              "name": "moodlewsrestformat",
-              "value": "json"
-            },
-            {
-              "name": "field",
-              "value": "username"
-            },
-            {
-              "name": "values[0]",
-              "value": "={{ $('Webhook commande').item.json.body.email }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "a1b2c3d4-0002-4000-8000-000000000002",
-      "name": "Chercher utilisateur Moodle",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        550,
-        0
-      ]
     },
     {
       "parameters": {
@@ -112,11 +137,52 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        330,
+        660,
         0
       ],
       "onError": "continueRegularOutput",
       "notes": "Cree le compte Moodle si absent. Si le compte existe deja, Moodle renvoie une exception : on continue, la recherche suivante retrouvera l'utilisateur."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "__MOODLE_URL__/webservice/rest/server.php",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "wstoken",
+              "value": "__MOODLE_WS_TOKEN__"
+            },
+            {
+              "name": "wsfunction",
+              "value": "core_user_get_users_by_field"
+            },
+            {
+              "name": "moodlewsrestformat",
+              "value": "json"
+            },
+            {
+              "name": "field",
+              "value": "username"
+            },
+            {
+              "name": "values[0]",
+              "value": "={{ $('Webhook commande').item.json.body.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "Chercher utilisateur Moodle",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        0
+      ]
     },
     {
       "parameters": {
@@ -159,7 +225,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        770,
+        1100,
         0
       ]
     },
@@ -173,7 +239,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        990,
+        1320,
         0
       ]
     }
@@ -183,7 +249,36 @@
       "main": [
         [
           {
+            "node": "Verifier signature HMAC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifier signature HMAC": {
+      "main": [
+        [
+          {
+            "node": "Signature valide ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Signature valide ?": {
+      "main": [
+        [
+          {
             "node": "Creer utilisateur Moodle",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reponse refus 401",
             "type": "main",
             "index": 0
           }

@@ -37,6 +37,21 @@ networks:
     # Exception documentee dans docs/security/02-durcissement-execution.md.
 
 services:
+  # ---------------------------------------------------------------------
+  # whoami : service de TEST uniquement.
+  #   - profiles: ["test"]  -> jamais demarre par defaut
+  #   - aucun label Traefik -> aucune exposition publique
+  #   - reseau app (interne) -> joignable seulement depuis la stack
+  # Usage : docker compose --profile test up -d whoami
+  # ---------------------------------------------------------------------
+  whoami:
+    <<: *durcissement
+    image: traefik/whoami:v1.12.0
+    container_name: cr465-whoami
+    profiles: ["test"]
+    user: "65534:65534"
+    read_only: true
+    networks: [app]
   # ------------------------------------------------------------------
   # socket-proxy : expose l'API Docker en LECTURE SEULE a Traefik.
   # Evite de monter /var/run/docker.sock en direct : le mode :ro sur un
@@ -394,6 +409,8 @@ services:
       # autorise les expressions {{ $env.X }} dans les noeuds : le jeton Moodle
       # n'est jamais ecrit dans le workflow (il vient du .env)
       N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+      # Autorise require("crypto") dans les noeuds Code (verification HMAC du webhook)
+      NODE_FUNCTION_ALLOW_BUILTIN: "crypto"
       # Moodle redirige HTTP -> HTTPS (wwwroot https) : on passe par le nom public
       # interne (alias DNS) et on fait confiance a l'AC du projet.
       NODE_EXTRA_CA_CERTS: /certs/cr465-ca.crt
