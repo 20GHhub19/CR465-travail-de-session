@@ -1,20 +1,44 @@
-# Plateforme pédagogique conteneurisée sécurisée — CR465
+# CR465 — Plateforme pédagogique conteneurisée sécurisée
 
-Travail de session (Polytechnique Montréal, CR465 Groupe D). Architecture multi-services conteneurisée (Docker Compose) sur une VM Linux provisionnée par cloud-init.
+Travail de session (Polytechnique Montréal, CR465 Groupe D). Plateforme multi-services conteneurisée et déployée avec Docker Compose sur une VM Linux initialisée par cloud-init (VM as Code).
 
-> **Référence** : l'énoncé et les grilles fournis par l'enseignant sont dans `md/`.
+**Parcours métier:** achat d'une formation dans Drupal Commerce &rarr; accès automatique attribué dans Moodle (connexion via Keycloak)
+
+> **Livrable:** [Gitbook](lien?) · [Vidéo](lien) \
+>**Référence** : l'énoncé et les grilles fournis par l'enseignant sont dans `md/`.
 > **Notre documentation** : technique dans `docs/`, livrable GitBook dans `gitbook/`.
 
-## Pile technique
-Traefik · Drupal Commerce · Moodle · Keycloak · n8n · PostgreSQL
-· Portainer CE · (bonus : Redis, Grafana/Loki, OpenAppSec) · durcissement gVisor.
+## Architecture en bref
 
-## Prérequis (poste de dev)
-- Git, Multipass, un éditeur. **Docker est installé _dans la VM_** par cloud-init.
+```mermaid
+flowchart LR
+  U[Utilisateur] --> T[Traefik]
+  T --> D[Drupal Commerce]
+  T --> M[Moodle]
+  T --> K[Keycloak]
+  T --> N[n8n]
+  T --> P[Portainer]
+  D -->|webhook| N -->|API| M
+  D & M & K & N --> DB[(PostgreSQL)]
+```
+Schémas détaillés : `docs/architecture/`
+
+## Pile technique
+
+Traefik · Drupal Commerce · Moodle · Keycloak · n8n · PostgreSQL
+· Portainer CE \
+**Bonus / Optionnel** : Redis, Grafana + Loki, OpenAppSec, gVisor.
+
+## Prérequis (poste de développement)
+- Git
+- Multipass
+- Un éditeur
+
+**Docker est installé _dans la VM_** par cloud-init.
 
 ## Démarrage rapide
 ```bash
-# 1. Lancer la VM (VM as Code)
+# 1. Créer la VM (VM as Code)
 multipass launch 24.04 --name plateforme --cpus 4 --memory 8G --disk 60G \
   --cloud-init cloud-init/user-data.yaml
 
@@ -26,20 +50,25 @@ docker compose -f compose/docker-compose.yml up -d
 ```
 
 ## Structure du dépôt
+
 | Dossier | Contenu |
 |---|---|
-| `cloud-init/` | VM as Code (user-data.yaml) |
-| `compose/` | services et configurations Docker Compose |
-| `docs/` | architecture, sécurité, opérations, tests |
+| `cloud-init/` | VM as Code (`user-data.yaml`) |
+| `compose/` | stack Docker Compose et configurations des services |
+| `docs/` | documentation technique (architecture, sécurité, opérations, tests) |
 | `gitbook/` | documentation GitBook (livrable) |
 | `md/` | énoncé et grilles de référence (fournis) |
-| `scripts/` | scripts de démarrage et de validation |
+| `scripts/` | création/destruction de la VM, déploiment, tests, validation |
 | `media/` | captures et ressources de la vidéo |
 
 ## Équipe et contributions
-Voir `md/Contributions.md`.
+Détails `md/Contributions.md`.
 
 | Membre | Rôle | Branche |
 |---|---|---|
-| (vous) | Coordination + Architecture | Projet-CR465-D-Gaius |
+| (Nom) | Rôle | Projet-CR465-D|
 | … | … | … |
+
+## Sécurité du dépôt
+Aucun secret n'est commité: seul `compose/.env.example` (valeurs factices) est versionné. \
+`.env` est dans `.gitignore`.
