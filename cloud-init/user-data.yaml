@@ -1,0 +1,117 @@
+#cloud-config
+# ============================================================
+# VM as Code - cr465-groupe-d pedagogique conteneurisee (CR465)
+# Initialise : utilisateur admin, SSH durci, maj, Docker,
+# pare-feu UFW, repertoires de travail, journalisation.
+# ============================================================
+
+hostname: cr465-groupe-d
+manage_etc_hosts: true
+
+# --- Utilisateur d'administration (cle SSH, sudo, pas de mot de passe) ---
+users:
+  - name: adminops
+    groups: [sudo, docker]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: true
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINTsRd3f9ImHopfGcd2UKzHRv0VikbPVAjLVl9Z/jsHV Equipe-D-CR465
+
+# --- SSH durci ---
+ssh_pwauth: false
+disable_root: true
+
+# --- Mises a jour initiales ---
+package_update: true
+package_upgrade: true
+packages:
+  - ca-certificates
+  - curl
+  - gnupg
+  - ufw
+  - fail2ban
+
+# --- Fichiers de configuration ---
+write_files:
+  # Durcissement du daemon Docker (no-new-privileges par defaut, logs bornes)
+  - path: /etc/docker/daemon.json
+    content: |
+      {
+        "log-driver": "json-file",
+        "log-opts": { "max-size": "10m", "max-file": "3" },
+        "no-new-privileges": true
+      }
+
+  # [AJOUT API-COMPAT] Autorise les clients Docker plus anciens (client embarque de Traefik v3.3)
+  - path: /etc/systemd/system/docker.service.d/api-compat.conf
+    permissions: '0644'
+    content: |
+      [Service]
+      Environment=DOCKER_MIN_API_VERSION=1.24
+
+  # --- Durcissement SSH (en plus de ssh_pwauth: false) ---
+  - path: /etc/ssh/sshd_config.d/99-hardening.conf
+    content: |
+      PermitRootLogin no
+      PasswordAuthentication no
+      MaxAuthTries 3
+      X11Forwarding no
+      ClientAliveInterval 300
+      ClientAliveCountMax 2
+  
+  # --- Durcissement noyau (sysctl) - sous-ensemble SANS casser Docker ---
+  - path: /etc/sysctl.d/99-hardening.conf
+    content: |
+      net.ipv4.conf.all.accept_source_route = 0
+      net.ipv4.conf.all.accept_redirects = 0
+      net.ipv4.conf.all.send_redirects = 0
+      net.ipv4.tcp_syncookies = 1
+      kernel.randomize_va_space = 2
+
+  # --- fail2ban : jail SSH locale ---
+  - path: /etc/fail2ban/jail.d/sshd.local
+    content: |
+      [sshd]
+      enabled = true
+      maxretry = 3
+      bantime = 1h
+
+# --- Commandes d'initialisation ---
+runcmd:
+  # Depot officiel Docker
+  - install -m 0755 -d /etc/apt/keyrings
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  - chmod a+r /etc/apt/keyrings/docker.asc
+  - >-
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc]
+    https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable"
+    > /etc/apt/sources.list.d/docker.list
+  - apt-get update
+  - apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  # [AJOUT API-COMPAT] Recharger systemd pour prendre le drop-in, puis redemarrer Docker
+  - systemctl daemon-reload
+  - systemctl restart docker
+  
+  # Pare-feu : on n'ouvre que SSH + HTTP + HTTPS
+  - ufw default deny incoming
+  - ufw default allow outgoing
+  - ufw allow 22/tcp
+  - ufw allow 80/tcp
+  - ufw allow 443/tcp
+  - ufw --force enable
+  # Repertoires de travail
+  - mkdir -p /opt/cr465-groupe-d/compose
+  - chown -R adminops:adminops /opt/cr465-groupe-d
+  # Services actifs
+  - systemctl enable --now docker
+  - systemctl enable --now fail2ban
+   # Mises à jour de sécurité automatiques
+  - apt-get install -y unattended-upgrades
+  - dpkg-reconfigure -f noninteractive unattended-upgrades
+  # Appliquer le durcissement
+  - sysctl --system
+  - systemctl restart ssh
+  - systemctl restart fail2ban
+
+final_message: "cloud-init termine en $UPTIME s - VM prete."

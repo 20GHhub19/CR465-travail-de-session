@@ -1,6 +1,6 @@
 # Travail de session — Architecture sécurisée d'une plateforme pédagogique conteneurisée sur VM as Code
 
-> **Ceci est un GitBook de présentation du mandat**, préparé par l'enseignant pour vous aider à naviguer l'énoncé. Il est **distinct du GitBook que votre équipe doit produire et remettre comme livrable** (voir [7. Livrables](07-livrables.md)) — ne confondez pas les deux.
+> **Ceci est un GitBook de présentation du mandat**, préparé par l'enseignant pour nous aider à naviguer l'énoncé. Il est **distinct du GitBook que notre équipe doit produire et remettre comme livrable** (voir [7. Livrables](07-livrables.md)) — ne confondons pas les deux.
 
 > **Source de vérité :** ce GitBook est dérivé de `md/official_enonce_travail_session_containers.md` et `md/grille_correction_travail_session_containers.md`. En cas de divergence entre ce GitBook et ces fichiers, **les fichiers `md/` font foi**.
 
