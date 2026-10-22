@@ -5,7 +5,7 @@ Travail de session (Polytechnique Montréal, CR465 Groupe D). Plateforme multi-s
 **Parcours métier:** achat d'une formation dans Drupal Commerce &rarr; accès automatique attribué dans Moodle (connexion via Keycloak)
 
 > **Livrable:** [Gitbook](lien?) · [Vidéo](lien) \
->**Référence** : l'énoncé et les grilles fournis par l'enseignant sont dans `md/`.
+>**Référence** : l'énoncé et les grilles fournis par l'enseignant sont dans `md/`. \
 > **Notre documentation** : technique dans `docs/`, livrable GitBook dans `gitbook/`.
 
 ## Architecture en bref
