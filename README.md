@@ -19,9 +19,12 @@ flowchart LR
   T --> N[n8n]
   T --> P[Portainer]
   D -->|webhook| N -->|API| M
+  M -.->|SSO| K 
   D & M & K & N --> DB[(PostgreSQL)]
 ```
-Schémas détaillés : `docs/architecture/`
+Seul Traefik est exposé: les services applicatifs et PostgreSQL restent en interne.
+
+Schémas détaillés : `docs/architecture/01-architecture-generale.md`
 
 ## Pile technique
 
